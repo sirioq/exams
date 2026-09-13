@@ -304,6 +304,9 @@ let state = {
   googleReady: false,
   googleSignedIn: false,
   googleLoading: false,
+  resultsView: 'question',  // question | student
+  studentSort: 'lowest',    // lowest | name
+  openStudent: null,
 };
 
 /* =========================================================================
@@ -476,7 +479,9 @@ function runAnalysis(){
     const name = state.mapping.name ? (row[state.mapping.name] || 'Unnamed') : 'Unnamed';
     if(!ansStr.trim()) return;
     const tokens = ansStr.trim().split(/\s+/);
-    let correctCount = 0, answeredCount = 0;
+    let correctCount = 0, wrongCount = 0, blankCount = 0;
+    const wrongQs = [];
+    const blankQs = [];
     tokens.forEach(tok=>{
       const m = tok.match(/^(\d+):(.*)$/);
       if(!m) return;
@@ -492,21 +497,31 @@ function runAnalysis(){
         given = rest;
       }
       perQuestion[n].total++;
+      const qMeta = QUESTIONS_META.find(q=>q.n===n);
       if(given){
         perQuestion[n].counts[given] = (perQuestion[n].counts[given]||0) + 1;
-        answeredCount++;
-        const qMeta = QUESTIONS_META.find(q=>q.n===n);
-        if(qMeta && given === qMeta.answer) correctCount++;
+        if(qMeta && given === qMeta.answer){
+          correctCount++;
+        } else {
+          wrongCount++;
+          wrongQs.push({n, given, correct: qMeta?qMeta.answer:'?'});
+        }
       } else {
         perQuestion[n].blank++;
+        blankCount++;
+        blankQs.push(n);
       }
     });
-    studentScores.push({name, correct: correctCount, answered: answeredCount});
+    const total = tokens.length;
+    studentScores.push({name, correct: correctCount, wrong: wrongCount, blank: blankCount, total, wrongQs, blankQs});
   });
 
   state.perQuestion = perQuestion;
   state.studentScores = studentScores;
   state.screen = 'results';
+  state.resultsView = 'question';
+  state.studentSort = 'lowest';
+  state.openStudent = null;
   state.error = null;
   render();
 }
@@ -538,9 +553,12 @@ function toggleRow(n){
 
 function setSortMode(m){ state.sortMode = m; render(); }
 function setPartFilter(p){ state.partFilter = p; render(); }
+function setResultsView(v){ state.resultsView = v; render(); }
+function setStudentSort(s){ state.studentSort = s; render(); }
+function toggleStudent(i){ state.openStudent = state.openStudent===i ? null : i; render(); }
 
 function reset(){
-  state = {screen:'upload', rawRows:[], headers:[], mapping:{name:null,answers:null}, perQuestion:{}, studentScores:[], sortMode:'hardest', partFilter:'all', openRow:null, error:null, googleReady:true, googleSignedIn:false, googleLoading:false};
+  state = {screen:'upload', rawRows:[], headers:[], mapping:{name:null,answers:null}, perQuestion:{}, studentScores:[], sortMode:'hardest', partFilter:'all', openRow:null, error:null, googleReady:true, googleSignedIn:false, googleLoading:false, resultsView:'question', studentSort:'lowest', openStudent:null};
   render();
 }
 
@@ -625,7 +643,7 @@ function renderOptionDist(q){
   return rows;
 }
 
-function renderResults(){
+function renderQuestionView(){
   const qList = QUESTIONS_META
     .filter(q => state.partFilter==='all' || q.part===state.partFilter)
     .map(q => ({q, pct: pctCorrect(q.n)}))
@@ -633,10 +651,6 @@ function renderResults(){
 
   if(state.sortMode==='hardest') qList.sort((a,b)=>a.pct-b.pct);
   else qList.sort((a,b)=>a.q.n-b.q.n);
-
-  const avgPct = qList.length ? Math.round(qList.reduce((s,x)=>s+x.pct,0)/qList.length) : 0;
-  const hardest = qList.length ? qList.reduce((m,x)=>x.pct<m.pct?x:m, qList[0]) : null;
-  const nResponses = state.studentScores.length;
 
   const rows = qList.map(({q,pct})=>{
     const wrong = mostCommonWrong(q.n);
@@ -661,13 +675,6 @@ function renderResults(){
   }).join('');
 
   return `
-  <div class="wrap">
-    <div class="stat-grid">
-      <div class="stat-card"><div class="n">${nResponses}</div><div class="l">Responses</div></div>
-      <div class="stat-card"><div class="n">${avgPct}%</div><div class="l">Avg % correct</div></div>
-      <div class="stat-card"><div class="n">Q${hardest?hardest.q.n:'–'}</div><div class="l">Hardest question</div></div>
-    </div>
-
     <div class="sort-tabs">
       <button class="${state.sortMode==='hardest'?'active':''}" onclick="setSortMode('hardest')">Hardest first</button>
       <button class="${state.sortMode==='number'?'active':''}" onclick="setSortMode('number')">Question order</button>
@@ -677,8 +684,71 @@ function renderResults(){
       <button class="${state.partFilter==='A'?'active':''}" onclick="setPartFilter('A')">Part A</button>
       <button class="${state.partFilter==='B'?'active':''}" onclick="setPartFilter('B')">Part B</button>
     </div>
-
     ${rows}
+  `;
+}
+
+function renderStudentView(){
+  const list = state.studentScores.map((s,i)=>({...s, i, pct: s.total ? Math.round((s.correct/s.total)*100) : 0}));
+
+  if(state.studentSort==='lowest') list.sort((a,b)=>a.pct-b.pct);
+  else list.sort((a,b)=>a.name.localeCompare(b.name));
+
+  const rows = list.map(s=>{
+    const color = s.pct>=70 ? 'var(--good)' : s.pct>=40 ? 'var(--warn)' : 'var(--bad)';
+    const isOpen = state.openStudent===s.i;
+    const wrongList = s.wrongQs.length
+      ? s.wrongQs.map(w=>`Q${w.n} (picked ${w.given}, correct ${w.correct})`).join(', ')
+      : 'None';
+    const blankList = s.blankQs.length ? s.blankQs.map(n=>'Q'+n).join(', ') : 'None';
+    return `
+    <div class="qrow ${isOpen?'open':''}">
+      <div class="qrow-head" onclick="toggleStudent(${s.i})">
+        <div class="qrow-num" style="width:auto; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.name}</div>
+        <div class="qrow-bar-wrap">
+          <div class="qrow-bar-track"><div class="qrow-bar-fill" style="width:${s.pct}%; background:${color};"></div></div>
+          <div class="qrow-sub">${s.correct}/${s.total} correct · ${s.wrong} wrong · ${s.blank} blank</div>
+        </div>
+        <div class="qrow-pct" style="color:${color};">${s.pct}%</div>
+      </div>
+      <div class="qrow-detail">
+        <div class="qtext" style="font-size:13.5px;"><strong>Wrong:</strong> ${wrongList}</div>
+        <div class="qtext" style="font-size:13.5px; margin-top:0;"><strong>Blank:</strong> ${blankList}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `
+    <div class="sort-tabs">
+      <button class="${state.studentSort==='lowest'?'active':''}" onclick="setStudentSort('lowest')">Lowest score first</button>
+      <button class="${state.studentSort==='name'?'active':''}" onclick="setStudentSort('name')">Alphabetical</button>
+    </div>
+    ${rows}
+  `;
+}
+
+function renderResults(){
+  const qList = QUESTIONS_META
+    .map(q => ({q, pct: pctCorrect(q.n)}))
+    .filter(x => x.pct !== null);
+  const avgPct = qList.length ? Math.round(qList.reduce((s,x)=>s+x.pct,0)/qList.length) : 0;
+  const hardest = qList.length ? qList.reduce((m,x)=>x.pct<m.pct?x:m, qList[0]) : null;
+  const nResponses = state.studentScores.length;
+
+  return `
+  <div class="wrap">
+    <div class="stat-grid">
+      <div class="stat-card"><div class="n">${nResponses}</div><div class="l">Responses</div></div>
+      <div class="stat-card"><div class="n">${avgPct}%</div><div class="l">Avg % correct</div></div>
+      <div class="stat-card"><div class="n">Q${hardest?hardest.q.n:'–'}</div><div class="l">Hardest question</div></div>
+    </div>
+
+    <div class="part-filter">
+      <button class="${state.resultsView==='question'?'active':''}" onclick="setResultsView('question')">By question</button>
+      <button class="${state.resultsView==='student'?'active':''}" onclick="setResultsView('student')">By student</button>
+    </div>
+
+    ${state.resultsView==='student' ? renderStudentView() : renderQuestionView()}
 
     <div class="btn-row">
       <button class="btn secondary" onclick="reset()">Load different data</button>
