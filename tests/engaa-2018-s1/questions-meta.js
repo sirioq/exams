@@ -1,0 +1,199 @@
+/* =========================================================================
+   ENGAA 2018 SECTION 1 -- ANALYSIS METADATA
+   Lean question data (no diagrams) for the class analysis tool.
+   Registers itself into the shared TESTS registry.
+   ========================================================================= */
+
+(function(){
+const QUESTIONS_META = [
+{n:1, part:"A", text:`A group of drivers, consisting of 200 women and 300 men, was asked if they passed their driving test at the first attempt.</p><p>Altogether 167 of the group said they passed at the first attempt.</p><p>Of the women, 143 said they did not pass at the first attempt.</p><p>How many of the men said they passed at the first attempt?`,
+ options:[["A","10"],["B","24"],["C","33"],["D","57"],["E","110"],["F","133"],["G","157"]], answer:"E"},
+
+{n:2, part:"A", text:`An unstable nucleus X becomes a stable nucleus Y after a succession of decays, during which a total of 5 alpha particles and 2 beta ($\\beta^-$) particles are emitted.</p><p>How many fewer protons does nucleus Y contain than nucleus X?`,
+ options:[["A","6"],["B","8"],["C","10"],["D","12"],["E","14"],["F","16"],["G","18"],["H","20"]], answer:"B"},
+
+{n:3, part:"A", text:`A cuboid has sides of length $x$, $2$ and $2x$, measured in cm.</p><p>The volume, in cm$^3$, of the cuboid is numerically equal to twice the total surface area, in cm$^2$, of the cuboid.</p><p>What is the value of $x$?`,
+ options:[["A","10"],["B","$6+2\\sqrt{2}$"],["C","5"],["D","$3+\\sqrt{2}$"],["E","$\\dfrac{5}{2}$"],["F","$\\dfrac{3}{2}+\\dfrac{\\sqrt{2}}{2}$"]], answer:"B"},
+
+{n:4, part:"A", text:`The diagram shows three resistors $R_1$, $R_2$ and $R_3$ connected in series with a battery of constant voltage. The resistance of each resistor and the corresponding current are also shown.`,
+ after:`<p>Resistor $R_3$ is now removed and the circuit is reconnected.</p><p>What is the new current in the circuit?`,
+ options:[["A","0.20 A"],["B","0.22 A"],["C","0.33 A"],["D","0.40 A"],["E","0.50 A"],["F","2.0 A"],["G","6.0 A"]], answer:"B"},
+
+{n:5, part:"A", text:`The line joining the points with coordinates $(p,\\ p-1)$ and $(1-p,\\ 2p)$ is parallel to the line with equation $2x+3y+1=0$.</p><p>What is the value of $p$?`,
+ options:[["A","$-1$"],["B","$-\\dfrac{1}{7}$"],["C","$\\dfrac{1}{9}$"],["D","$\\dfrac{1}{8}$"],["E","1"],["F","$\\dfrac{5}{4}$"],["G","2"],["H","5"]], answer:"H"},
+
+{n:6, part:"A", text:`When travelling in a vacuum, visible light has a wavelength between 400 nm and 700 nm.</p><p>The speed of light in a vacuum is $3.0\\times10^{8}\\ \\text{m s}^{-1}$.</p><p>What can be concluded about ultraviolet radiation from this information?`,
+ options:[["A","It has a maximum frequency of $2.7\\times10^{14}$ Hz"],["B","It has a maximum frequency of $4.3\\times10^{14}$ Hz"],["C","It has a maximum frequency of $7.5\\times10^{14}$ Hz"],["D","It has a maximum frequency of $1.0\\times10^{15}$ Hz"],["E","It has a minimum frequency of $2.7\\times10^{14}$ Hz"],["F","It has a minimum frequency of $4.3\\times10^{14}$ Hz"],["G","It has a minimum frequency of $7.5\\times10^{14}$ Hz"],["H","It has a minimum frequency of $1.0\\times10^{15}$ Hz"]], answer:"G"},
+
+{n:7, part:"A", text:`A rectangle PQRS is drawn inside a circle, with its vertices on the circumference of the circle.`,
+ after:`<p>The ratio of the length of PQ to the length of QR is $2:1$.</p><p>The area of the rectangle PQRS is 96 cm$^2$.</p><p>What is the radius, in cm, of the circle?`,
+ options:[["A","$\\sqrt{6}$"],["B","3"],["C","$3\\sqrt{2}$"],["D","$2\\sqrt{15}$"],["E","$4\\sqrt{6}$"],["F","12"],["G","$12\\sqrt{2}$"],["H","$8\\sqrt{15}$"]], answer:"D"},
+
+{n:8, part:"A", text:`A filament lamp working at its operating voltage converts electrical energy at a rate of 100 W.</p><p>The lamp has an efficiency of 5.0%.</p><p>How much energy is wasted by the lamp in 10 minutes?`,
+ options:[["A","50 J"],["B","950 J"],["C","1000 J"],["D","3000 J"],["E","57 000 J"],["F","60 000 J"]], answer:"E"},
+
+{n:9, part:"A", text:`At a cinema, drinks are sold in regular and large sizes. The cups for these are mathematically similar.`,
+ after:`<p>The ratio of the heights of the cups and the ratio of the depths of the drinks are both $4:5$.</p><p>The volume of drink in a regular size cup is 320 cm$^3$.</p><p>What is the volume, in cm$^3$, of drink in a large size cup?`,
+ options:[["A","384"],["B","400"],["C","500"],["D","576"],["E","625"],["F","640"]], answer:"E"},
+
+{n:10, part:"A", text:`The potential difference across the motor in an electric car is 400 V and the current in the motor is 1250 A.</p><p>The car accelerates along a horizontal road from rest for 4.0 s.</p><p>The efficiency of the overall system is 45%.</p><p>What is the kinetic energy of the car at the end of the 4.0 s?</p><p>(Ignore energy losses due to air resistance and due to friction between the tyres and the road.)`,
+ options:[["A","225 000 J"],["B","500 000 J"],["C","900 000 J"],["D","1 250 000 J"],["E","2 000 000 J"]], answer:"C"},
+
+{n:11, part:"A", text:`The straight lines</p><p style="text-align:center">$5x+2y=20$<br>$y=3x-23$<br>$x=0$</p><p>enclose a region with area $K$ square units.</p><p>What is the value of $K$?`,
+ options:[["A","39"],["B","78"],["C","99"],["D","129"],["E","198"],["F","258"]], answer:"C"},
+
+{n:12, part:"A", text:`The momentum of a small object moving in a straight line is 24 kg m s$^{-1}$ and its kinetic energy is 96 J.</p><p>What is the mass of the object?`,
+ options:[["A","3.0 kg"],["B","4.0 kg"],["C","6.0 kg"],["D","8.0 kg"],["E","12 kg"]], answer:"A"},
+
+{n:13, part:"A", text:`A scale model of a cylindrical pillar is to be made.</p><p>The full-sized pillar has a volume of $12\\pi\\ \\text{m}^3$.</p><p>The model will use a length scale of $1:40$.</p><p>The model is to be a solid cylinder made of a plastic which has a density of $\\dfrac{4}{3}\\ \\text{g cm}^{-3}$.</p><p>What is the mass of the model in grams?`,
+ options:[["A","$\\dfrac{9}{640}\\pi$"],["B","$\\dfrac{1}{40}\\pi$"],["C","$40\\pi$"],["D","$\\dfrac{1125}{8}\\pi$"],["E","$250\\pi$"],["F","$10\\,000\\pi$"],["G","$225\\,000\\pi$"],["H","$400\\,000\\pi$"]], answer:"E"},
+
+{n:14, part:"A", text:`A radioactive isotope decays in a single step to a stable isotope. A radiation detector is placed very near to a sample of the radioactive isotope in a laboratory. The count rate on the detector changes as time elapses. The graph shows how the measured count rate changes with time.`,
+ after:`<p>What is the background count rate and what is the half-life of the isotope?</p>
+ <table style="width:100%; border-collapse:collapse; font-family:Georgia; font-size:15px; margin-top:8px;">
+ <tr style="border-bottom:1px solid #d4dae4;"><th style="text-align:left; padding:6px 4px;">Option</th><th style="text-align:left; padding:6px 4px;">Background / cpm</th><th style="text-align:left; padding:6px 4px;">Half-life / min</th></tr>
+ </table>`,
+ options:[["A","background 20 cpm, half-life 40 min"],["B","background 20 cpm, half-life 50 min"],["C","background 20 cpm, half-life 60 min"],["D","background 20 cpm, half-life 65 min"],["E","background 120 cpm, half-life 40 min"],["F","background 120 cpm, half-life 50 min"],["G","background 120 cpm, half-life 60 min"],["H","background 120 cpm, half-life 65 min"]], answer:"A"},
+
+{n:15, part:"A", text:`PQRST is a regular pentagon. RSU is an equilateral triangle.`,
+ after:`<p>What is the size of angle STU?`,
+ options:[["A","48°"],["B","54°"],["C","60°"],["D","66°"],["E","84°"]], answer:"D"},
+
+{n:16, part:"A", text:`A rock falling vertically experiences an air resistance force of 12 N at an instant when its acceleration is 2.0 m s$^{-2}$ downwards.</p><p>What is the mass of the rock?</p><p>(gravitational field strength $=10\\ \\text{N kg}^{-1}$)`,
+ options:[["A","1.0 kg"],["B","1.2 kg"],["C","1.5 kg"],["D","6.0 kg"],["E","10 kg"],["F","12 kg"],["G","15 kg"],["H","60 kg"]], answer:"C"},
+
+{n:17, part:"A", text:`The original price of an item is $p$.</p><p>The price is increased by 125%.</p><p>The increased price is then decreased by 40% to $q$.</p><p>The relationship between $p$ and $q$ can be expressed as $mp=q$.</p><p>What is the value of $m$?`,
+ options:[["A","$\\dfrac{7}{20}$"],["B","$\\dfrac{17}{20}$"],["C","$\\dfrac{27}{20}$"],["D","$\\dfrac{33}{20}$"],["E","$\\dfrac{37}{20}$"]], answer:"C"},
+
+{n:18, part:"A", text:`A transverse wave with an amplitude of 4.0 cm and a frequency of 10 Hz travels along a rope at a speed of 2.4 m s$^{-1}$.</p><p>What is the total distance travelled by a particle in the rope in a time of 20 s?`,
+ options:[["A","2.4 m"],["B","4.8 m"],["C","8.0 m"],["D","16 m"],["E","32 m"],["F","48 m"]], answer:"E"},
+
+{n:19, part:"A", text:`Q is 5 km away from P on a bearing of 065°.</p><p>R is 5 km away from Q on a bearing of 155°.</p><p>What is the bearing of P from R?`,
+ options:[["A","070°"],["B","110°"],["C","225°"],["D","270°"],["E","290°"],["F","315°"],["G","335°"]], answer:"E"},
+
+{n:20, part:"A", text:`A student places a measuring cylinder on a balance. She pours a volume $V$ of water into the measuring cylinder, and finds that the mass of the measuring cylinder and water together is 290 g.</p><p>She then empties the measuring cylinder and dries it before putting it back on the balance.</p><p>She now pours the same volume $V$ of olive oil into the measuring cylinder, and finds that the mass of the measuring cylinder and olive oil together is 270 g.</p><p>What is the mass of the measuring cylinder?</p><p>(densities: olive oil $=0.90\\ \\text{g cm}^{-3}$; water $=1.0\\ \\text{g cm}^{-3}$)`,
+ options:[["A","18 g"],["B","20 g"],["C","90 g"],["D","180 g"],["E","200 g"]], answer:"C"},
+
+{n:21, part:"A", text:`The line segment RT is a tangent at the point S to a circle with centre O. Q and P are points on the circumference of the circle such that QS = QP. Angle PST = 75°.`,
+ after:`<p>What is the size of angle QSO?`,
+ options:[["A","15°"],["B","30°"],["C","37.5°"],["D","45°"],["E","52.5°"],["F","60°"],["G","67.5°"],["H","75°"]], answer:"C"},
+
+{n:22, part:"A", text:`A skydiver of weight 1000 N falls vertically. The distance–time graph for the skydiver is shown below.`,
+ after:`<p>The air resistance $F$ (in N) acting on the skydiver travelling at velocity $v$ (in m s$^{-1}$) is given by the equation $F=kv^2$, where $k$ (in N m$^{-2}$ s$^2$) is a constant.</p><p>What is the numerical value of $k$ for the skydiver?`,
+ options:[["A","0.050"],["B","0.40"],["C","0.63"],["D","2.5"],["E","20"]], answer:"B"},
+
+{n:23, part:"A", text:`The vertical height $h$ cm of an isosceles triangle is 3 cm longer than the base length of $b$ cm. The sloping side is of length $s$ cm.`,
+ after:`<p>The area of the triangle is 14 cm$^2$.</p><p>There is one value of $s$ which satisfies these conditions.</p><p>Within which range does this value of $s$ lie?`,
+ options:[["A","$5<s<6$"],["B","$6<s<7$"],["C","$7<s<8$"],["D","$8<s<9$"],["E","$9<s<10$"],["F","$10<s<11$"]], answer:"C"},
+
+{n:24, part:"A", text:`A neutron is absorbed by a uranium-235 ($^{235}_{\\ 92}\\text{U}$) nuclide.</p><p>The resulting nuclide undergoes fission to produce a bromine-88 ($^{88}_{\\ 35}\\text{Br}$) nuclide, a lanthanum-145 nuclide and some neutrons.</p><p>The lanthanum-145 nuclide is radioactive and emits a beta ($\\beta^-$) particle.</p><p>How many neutrons are emitted in the fission reaction and how many protons are there in the nuclide formed by the decay of lanthanum-145?`,
+ options:[["A","2 neutrons, 55 protons"],["B","2 neutrons, 56 protons"],["C","2 neutrons, 57 protons"],["D","2 neutrons, 58 protons"],["E","3 neutrons, 55 protons"],["F","3 neutrons, 56 protons"],["G","3 neutrons, 57 protons"],["H","3 neutrons, 58 protons"]], answer:"H"},
+
+{n:25, part:"A", text:`The first five terms of a sequence in order are:</p><p style="text-align:center">2 &nbsp; 17 &nbsp; 42 &nbsp; 77 &nbsp; 122</p><p>The $n$th term of this sequence is $pn^2+q$ where $p$ and $q$ are integers.</p><p>What is the value of $\\dfrac{p-q}{p+q}$?`,
+ options:[["A","$\\dfrac{1}{4}$"],["B","$\\dfrac{1}{2}$"],["C","1"],["D","$\\dfrac{23}{17}$"],["E","$\\dfrac{13}{7}$"],["F","2"],["G","4"],["H","14"]], answer:"G"},
+
+{n:26, part:"A", text:`The diagram shows a circuit containing a battery and three identical resistors X, Y and Z.`,
+ after:`<p>The total power supplied by the battery is 18 W.</p><p>What is the power dissipated as heat in resistor X?`,
+ options:[["A","1.5 W"],["B","2.0 W"],["C","3.0 W"],["D","4.5 W"],["E","6.0 W"],["F","8.0 W"],["G","12 W"]], answer:"C"},
+
+{n:27, part:"A", text:`A bag contains 6 red and 6 green sweets. The sweets are identical apart from their colour.</p><p>A child takes a sweet at random from the bag. If the sweet is red, the child stops taking sweets. If the sweet is green, it is not replaced and the child takes another sweet. This continues until a red sweet is taken, at which point the child stops taking sweets.</p><p>What is the probability that the child takes more green sweets than red sweets?`,
+ options:[["A","$\\dfrac{3}{22}$"],["B","$\\dfrac{5}{22}$"],["C","$\\dfrac{3}{11}$"],["D","$\\dfrac{1}{2}$"],["E","$\\dfrac{8}{11}$"],["F","$\\dfrac{17}{22}$"]], answer:"B"},
+
+{n:28, part:"A", text:`Three detectors X, Y and Z are separated by large distances. Each of the detectors records a seismic wave from the same earthquake whose epicentre (source) is very close to the surface of the Earth.</p><p>The wave travels out from the epicentre at 4.0 km s$^{-1}$.</p><p>Detectors X and Y start to detect the wave at the same time, but detector Z starts to detect it one minute later.</p><p>Which of the following statements must be correct?</p><p>1&nbsp;&nbsp; The epicentre is at the midpoint of the line XY.<br>2&nbsp;&nbsp; Z is equidistant from X and Y.<br>3&nbsp;&nbsp; Z is no more than 240 km away from X and from Y.`,
+ options:[["A","none of them"],["B","1 only"],["C","2 only"],["D","3 only"],["E","1 and 2 only"],["F","1 and 3 only"],["G","2 and 3 only"],["H","1, 2 and 3"]], answer:"A"},
+
+{n:29, part:"B", text:`Curve $C$ has equation $y=9-x^2$.</p><p>Line $L$ has equation $y=5$.</p><p>What is the area enclosed between $C$ and $L$?`,
+ options:[["A","$\\dfrac{32}{3}$"],["B","$\\dfrac{62}{3}$"],["C","$\\dfrac{92}{3}$"],["D","$\\dfrac{122}{3}$"],["E","$\\dfrac{152}{3}$"]], answer:"A"},
+
+{n:30, part:"B", text:`An aircraft moves from rest with uniform acceleration along a horizontal runway. After travelling 1600 m it reaches a speed of 80 m s$^{-1}$.</p><p>What is the acceleration of the aircraft?`,
+ options:[["A","0.025 m s$^{-2}$"],["B","0.050 m s$^{-2}$"],["C","0.10 m s$^{-2}$"],["D","0.50 m s$^{-2}$"],["E","2.0 m s$^{-2}$"],["F","4.0 m s$^{-2}$"],["G","10 m s$^{-2}$"],["H","20 m s$^{-2}$"]], answer:"E"},
+
+{n:31, part:"B", text:`How many solutions of the equation $2\\sin^3\\theta=\\sin\\theta$ lie in the interval $-\\dfrac{\\pi}{2}\\le\\theta\\le\\pi$?`,
+ options:[["A","2"],["B","3"],["C","4"],["D","5"],["E","6"],["F","7"]], answer:"D"},
+
+{n:32, part:"B", text:`The diagram represents a mass that is moving in a straight line at constant speed up a slope of constant gradient.`,
+ after:`<p>Which statement about the forces acting on the mass must be correct?`,
+ options:[["A","All the forces acting on the mass are equal in magnitude."],["B","Only three forces act on the mass."],["C","The force of friction on the mass is equal to the driving force."],["D","The weight of the mass acts in the opposite direction to the contact force."],["E","There is no air resistance acting on the mass."],["F","There is no resultant force acting on the mass."]], answer:"F"},
+
+{n:33, part:"B", text:`The line $y=x+k$, where $k$ is a constant, is a tangent to the curve $y=3x^2-2x+1$.</p><p>What is the value of $k$?`,
+ options:[["A","$-2$"],["B","$-1$"],["C","$\\dfrac{1}{4}$"],["D","$\\dfrac{1}{3}$"],["E","$\\dfrac{1}{2}$"],["F","$\\dfrac{3}{4}$"],["G","1"],["H","2"]], answer:"C"},
+
+{n:34, part:"B", text:`The diagram shows four objects W, X, Y and Z, of masses 3.0 kg, 4.0 kg, 6.0 kg and 2.0 kg respectively, connected by light, inextensible rods. The objects are pulled along a smooth, horizontal surface by a constant force of 30 N in the direction indicated.`,
+ after:`<p>What is the tension in the rod connecting X and Y?`,
+ options:[["A","8.0 N"],["B","10 N"],["C","12 N"],["D","14 N"],["E","16 N"]], answer:"D"},
+
+{n:35, part:"B", text:`A sector S of a circle has area $10\\pi\\ \\text{cm}^2$.</p><p>The angle of sector S is increased by $\\dfrac{\\pi}{20}$ radians to form sector T.</p><p>The total area of sector T is $\\dfrac{25}{2}\\pi\\ \\text{cm}^2$.</p><p>What is the total arc length, in cm, of sector T?`,
+ options:[["A","$\\dfrac{9\\sqrt{5}}{10}\\pi$"],["B","$\\dfrac{25}{4}\\pi$"],["C","$2\\pi$"],["D","$\\dfrac{5}{2}\\pi$"]], answer:"D"},
+
+{n:36, part:"B", text:`An object of mass 40 kg is placed on a uniform, horizontal plank of mass 10 kg between two supports X and Y as shown in the diagram.`,
+ after:`<p>What is the contact force at X?</p><p>(gravitational field strength $=10\\ \\text{N kg}^{-1}$)`,
+ options:[["A","15 N"],["B","35 N"],["C","150 N"],["D","250 N"],["E","300 N"],["F","350 N"],["G","375 N"]], answer:"F"},
+
+{n:37, part:"B", text:`In a particular arithmetic progression:</p><p>• the 13th term is six times the 1st term<br>• the 11th term is 1 less than twice the 5th term</p><p>What is the 3rd term of the progression?`,
+ options:[["A","$-14.5$"],["B","$-11$"],["C","$\\dfrac{29}{19}$"],["D","3.5"],["E","11"],["F","14.5"]], answer:"E"},
+
+{n:38, part:"B", text:`A block of mass $m$ slides a distance $l$ down a slope that is inclined at angle $\\theta$ to the horizontal, as shown.`,
+ after:`<p>The block experiences a friction force of $kW\\sin\\theta$, where $W$ is the weight of the block and $k$ is a constant.</p><p>The block starts from rest at the top of the slope and slides down a distance $l$ to the bottom, where its potential energy is zero.</p><p>What fraction of the initial potential energy at the top has become kinetic energy as the block reaches the bottom?`,
+ options:[["A","$k$"],["B","$1-k$"],["C","$k\\sin\\theta$"],["D","$1-k\\sin\\theta$"],["E","$k\\tan\\theta$"],["F","$1-k\\tan\\theta$"]], answer:"B"},
+
+{n:39, part:"B", text:`The first three terms of a geometric progression, whose terms are all greater than zero, are $(p-2)$, $(2p+2)$ and $(5p+14)$.</p><p>What is the fifth term of the progression?`,
+ options:[["A","324"],["B","486"],["C","1250"],["D","1458"],["E","3888"]], answer:"B"},
+
+{n:40, part:"B", text:`An object X of mass 2.0 kg is initially moving at a speed of 4.5 m s$^{-1}$ on a smooth, horizontal surface.</p><p>A 5.0 N force is applied to X in the direction of its motion for 3.0 seconds.</p><p>A short time later it collides head on with, and sticks to, a stationary object Y of mass 3.0 kg.</p><p>What is the speed of X and Y as they move off together after the collision?`,
+ options:[["A","1.8 m s$^{-1}$"],["B","3.0 m s$^{-1}$"],["C","3.6 m s$^{-1}$"],["D","4.8 m s$^{-1}$"],["E","5.4 m s$^{-1}$"]], answer:"D"},
+
+{n:41, part:"B", text:`Evaluate</p><p style="text-align:center">$\\log_2\\!\\left(\\dfrac{5}{4}\\right)+\\log_2\\!\\left(\\dfrac{6}{5}\\right)+\\log_2\\!\\left(\\dfrac{7}{6}\\right)+\\dots+\\log_2\\!\\left(\\dfrac{64}{63}\\right)$`,
+ options:[["A","$-2$"],["B","3"],["C","4"],["D","6"],["E","$\\log_2(3!)$"],["F","$\\log_2 60$"]], answer:"C"},
+
+{n:42, part:"B", text:`A ball of mass 0.20 kg is thrown vertically downwards at an initial speed of 4.0 m s$^{-1}$ and travels a distance of 0.45 m to the ground.</p><p>The ball hits the ground, and rebounds with an initial speed of 2.0 m s$^{-1}$.</p><p>How much energy does the ball lose in the bounce?</p><p>(gravitational field strength $=10\\ \\text{N kg}^{-1}$; air resistance can be ignored)`,
+ options:[["A","0.10 J"],["B","0.40 J"],["C","0.50 J"],["D","0.90 J"],["E","1.2 J"],["F","1.6 J"],["G","2.1 J"]], answer:"G"},
+
+{n:43, part:"B", text:`Circle C has equation $(x+3)^2+(y-2)^2=5$.</p><p>The length of the tangent from the circle C to the point P is $5\\sqrt{3}$.</p><p>What is the shortest distance from P to C?`,
+ options:[["A","$5\\sqrt{3}$"],["B","$5\\sqrt{3}+\\sqrt{5}$"],["C","$3\\sqrt{5}$"],["D","5"],["E","10"]], answer:"C"},
+
+{n:44, part:"B", text:`Two solid spheres X and Y have masses $m$ and $2m$ respectively. They travel in opposite directions towards each other along the same line with speeds $v$ and $2v$ respectively and collide head on. The graph shows the variation of velocity with time for sphere X before, during, and after the collision.`,
+ after:`<p>Which sketch shows the variation of velocity with time for sphere Y? (Answer options are graphs — see original paper.)`,
+ options:[["A","Graph A"],["B","Graph B"],["C","Graph C"],["D","Graph D"],["E","Graph E"],["F","Graph F"]], answer:"E"},
+
+{n:45, part:"B", text:`The points A$(-3,2)$, B$(1,3)$ and C$(-1,u)$ are such that the distances AC and AB are related by $\\text{AC}=2\\,\\text{AB}$.</p><p>What are the possible values of $u$?`,
+ options:[["A","2 and $-6$"],["B","$-2$ and 6"],["C","6 and $-10$"],["D","$-6$ and 10"],["E","$2+2\\sqrt{13}$ and $2-2\\sqrt{13}$"],["F","$-3+2\\sqrt{13}$ and $-3-2\\sqrt{13}$"]], answer:"D"},
+
+{n:46, part:"B", text:`A metal ball suspended from a steel cable is held at rest by a horizontal force P. The cable makes an angle of 30° to the vertical as shown in the diagram. The cable exerts a force T on the ball.`,
+ after:`<p>What is the magnitude of P?`,
+ options:[["A","$\\dfrac{T}{2}$"],["B","$T$"],["C","$2T$"],["D","$\\dfrac{T}{\\sqrt{2}}$"],["E","$\\dfrac{T}{3}$"],["F","$\\dfrac{2T}{3}$"],["G","$\\dfrac{3T}{2}$"]], answer:"A"},
+
+{n:47, part:"B", text:`What is the coefficient of $x^3$ in the expansion of $(1-2x)^5(1+2x)^5$?`,
+ options:[["A","$-6400$"],["B","$-640$"],["C","$-80$"],["D","0"],["E","80"],["F","800"],["G","960"]], answer:"D"},
+
+{n:48, part:"B", text:`A pendulum bob of mass 10 g is suspended by a light, inextensible string of length 50 cm. The bob is released from rest at position X.`,
+ after:`<p>What is the speed of the bob as it passes through position Y?</p><p>(gravitational field strength $g=10\\ \\text{N kg}^{-1}$; assume that resistive forces are negligible)`,
+ options:[["A","$\\sqrt{2}$ m s$^{-1}$"],["B","$\\sqrt{4}$ m s$^{-1}$"],["C","$\\sqrt{6}$ m s$^{-1}$"],["D","$\\sqrt{8}$ m s$^{-1}$"],["E","$\\sqrt{10}$ m s$^{-1}$"]], answer:"A"},
+
+{n:49, part:"B", text:`Given that</p><p style="text-align:center">$\\displaystyle\\int_0^{m} (2x-6)\\,dx = -\\dfrac{7}{2}$ &nbsp; and &nbsp; $\\displaystyle\\int_0^{2}(3x+9)\\,dx = \\dfrac{1}{m}$</p><p>what is the value of $m$? <span style="font-size:12.5px;color:#5b6478">(exact integrand terms as printed in the original paper may vary slightly in formatting)</span>`,
+ options:[["A","$-\\dfrac{11}{2}$"],["B","$-\\dfrac{9}{2}$"],["C","$-\\dfrac{22}{29}$"],["D","$\\dfrac{7}{22}$"],["E","$\\dfrac{5}{2}$"],["F","$\\dfrac{7}{2}$"]], answer:"E"},
+
+{n:50, part:"B", text:`An object of mass $m$ is initially moving at constant speed $u$ to the right. It collides with a stationary object of greater mass $M$ and bounces back in the opposite direction at speed $v$.</p><p>What is the speed of the greater mass immediately after the collision?`,
+ options:[["A","$\\dfrac{mu}{M}$"],["B","$\\dfrac{Mu}{m}$"],["C","$\\dfrac{m(v-u)}{M}$"],["D","$\\dfrac{M(v-u)}{m}$"],["E","$\\dfrac{m(v+u)}{M}$"],["F","$\\dfrac{M(v+u)}{m}$"]], answer:"E"},
+
+{n:51, part:"B", text:`The two functions $f$ and $g$ satisfy $f'(x)=ax+g(x)$ where $a$ is a constant.</p><p>Given that $\\displaystyle\\int_2^4 g(x)\\,dx=12$ and $f(4)=18+f(2)$, what is the value of $a$?`,
+ options:[["A","1"],["B","3"],["C","5"],["D","6"],["E","15"]], answer:"A"},
+
+{n:52, part:"B", text:`A load drops from rest through a vertical height $h$ to the ground. A light cable attached to the load passes over a friction pulley that provides a braking force during the fall.`,
+ after:`<p>As the load falls through height $h$, 50% of the gravitational potential energy lost is transferred into thermal energy.</p><p>The load reaches a final speed of 10 m s$^{-1}$.</p><p>What is the vertical height $h$?</p><p>(gravitational field strength $g=10\\ \\text{N kg}^{-1}$; air resistance can be ignored)`,
+ options:[["A","0.50 m"],["B","1.0 m"],["C","2.0 m"],["D","2.5 m"],["E","5.0 m"],["F","10 m"],["G","20 m"]], answer:"F"},
+
+{n:53, part:"B", text:`The dimensions of a solid cuboid, in cm, are $x$, $2x$ and $y$.</p><p>The volume of the cuboid is 576 cm$^3$.</p><p>At this volume, the surface area of the cuboid has its stationary (extreme) value.</p><p>What is the area, in cm$^2$, of the face that has the largest area?`,
+ options:[["A","$2(288)^{2/3}$"],["B","72"],["C","96"],["D","432"],["E","$4(144)^{2/3}$"]], answer:"C"},
+
+{n:54, part:"B", text:`An object is thrown vertically upwards from ground level with an initial velocity of 40 m s$^{-1}$.</p><p>2.0 seconds later another object is released from a height above the ground and falls vertically from rest.</p><p>Both of the objects hit the ground at the same time.</p><p>From what height above the ground was the second object released?</p><p>(gravitational field strength $g=10\\ \\text{N kg}^{-1}$; air resistance can be ignored)`,
+ options:[["A","80 m"],["B","180 m"],["C","320 m"],["D","500 m"],["E","900 m"]], answer:"B"},
+];
+
+window.registerTest({
+  id: "engaa-2018-s1",
+  label: "ENGAA 2018 — Section 1",
+  spreadsheetId: "1uIIVT81OBdmi1Hs7ILaCMBe5wOxXAO6R4BQ_nb_eTXQ",
+  range: "Form responses 1!A:Z",
+  questions: QUESTIONS_META,
+});
+})();
