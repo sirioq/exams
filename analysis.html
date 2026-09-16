@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Class Results Analysis</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<link rel="stylesheet" href="shared/analysis-styles.css">
+</head>
+<body>
+<div id="app"></div>
+
+<!-- Bootstrap: must run before any test's questions-meta.js -->
+<script>
+  window.TESTS = [];
+  window.registerTest = function(t){ window.TESTS.push(t); };
+</script>
+
+<!--
+  Register each test here. To add a new test:
+    1. Create tests/<new-test-id>/questions-meta.js (same shape as this one)
+    2. Add one line below including it
+  That's it — it'll show up in the test picker automatically.
+-->
+<script src="tests/engaa-2018-s1/questions-meta.js"></script>
+
+<script src="shared/analysis-engine.js"></script>
+</body>
+</html>
