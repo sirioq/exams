@@ -113,9 +113,13 @@ function fetchFromSheetsAPI(accessToken){
       state.rawRows = rows;
       state.googleSignedIn = true;
       autoDetectColumns();
-      state.screen = 'mapping';
       state.error = null;
-      render();
+      if(!state.mapping.answers){
+        state.error = 'Could not find a column with answer data (like "1:A 2:B✗C ...") in this sheet. Check you picked the right test, or that the sheet has responses yet.';
+        render();
+        return;
+      }
+      runAnalysis();
     })
     .catch(err => {
       state.error = err.message;
@@ -132,34 +136,6 @@ function renderMath(container){
       throwOnError:false
     });
   }
-}
-
-function parseCSVText(text){
-  const result = Papa.parse(text.trim(), {header:true, skipEmptyLines:true});
-  state.headers = result.meta.fields || [];
-  state.rawRows = result.data;
-  autoDetectColumns();
-  state.screen = 'mapping';
-  state.error = null;
-  render();
-}
-
-function handleFile(evt){
-  const file = evt.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = e => parseCSVText(e.target.result);
-  reader.readAsText(file);
-}
-
-function handlePasteAnalyze(){
-  const text = document.getElementById('pasteArea').value;
-  if(!text.trim()){
-    state.error = 'Paste some CSV data first, or choose a file.';
-    render();
-    return;
-  }
-  parseCSVText(text);
 }
 
 function autoDetectColumns(){
@@ -184,11 +160,9 @@ function autoDetectColumns(){
     nameCol = headers.find(h => h !== state.mapping.answers) || headers[0];
   }
   state.mapping.name = nameCol;
-}
 
-function setMapping(field, value){
-  state.mapping[field] = value;
-  render();
+  // Timestamp column: Google Forms always adds one called "Timestamp"
+  state.mapping.timestamp = headers.find(h => /timestamp/i.test(h)) || null;
 }
 
 function runAnalysis(){
@@ -206,6 +180,7 @@ function runAnalysis(){
   state.rawRows.forEach(row=>{
     const ansStr = row[state.mapping.answers] || '';
     const name = state.mapping.name ? (row[state.mapping.name] || 'Unnamed') : 'Unnamed';
+    const timestamp = state.mapping.timestamp ? (row[state.mapping.timestamp] || null) : null;
     if(!ansStr.trim()) return;
     const tokens = ansStr.trim().split(/\s+/);
     let correctCount = 0, wrongCount = 0, blankCount = 0;
@@ -242,7 +217,7 @@ function runAnalysis(){
       }
     });
     const total = tokens.length;
-    studentScores.push({name, correct: correctCount, wrong: wrongCount, blank: blankCount, total, wrongQs, blankQs});
+    studentScores.push({name, timestamp, correct: correctCount, wrong: wrongCount, blank: blankCount, total, wrongQs, blankQs});
   });
 
   state.perQuestion = perQuestion;
@@ -322,16 +297,21 @@ function renderUpload(){
   const test = currentTest();
   const googleSection = isGoogleConfigured() ? `
     <div class="card">
-      <h3>Pull results automatically</h3>
+      <h3>Pull results</h3>
       <p class="muted">Sign in with the Google account that has access to your results sheet. Only accounts you've shared the sheet with can pull data — no separate password needed.</p>
       <div class="btn-row">
         <button class="btn" onclick="signInWithGoogle()" ${state.googleReady?'':'disabled'}>
           ${state.googleLoading ? 'Signing in…' : (state.googleReady ? 'Sign in with Google' : 'Loading…')}
         </button>
       </div>
+      ${state.error ? `<div class="error-box">${state.error}</div>` : ''}
     </div>
-    <div style="text-align:center; color:var(--ink-soft); font-size:12px; margin:4px 0 16px;">— or —</div>
-  ` : '';
+  ` : `
+    <div class="card">
+      <h3>Google sign-in not set up</h3>
+      <p class="muted">This test is missing a spreadsheetId in its questions-meta.js, so results can't be pulled yet.</p>
+    </div>
+  `;
 
   return `
   <div class="wrap">
@@ -341,41 +321,6 @@ function renderUpload(){
       <a href="#" onclick="switchTest(); return false;">switch test</a>
     </div>` : ''}
     ${googleSection}
-    <div class="card">
-      <h3>Load your class results manually</h3>
-      <p class="muted">In Google Sheets: File → Download → Comma Separated Values (.csv), then choose that file below. Or just select all the cells in your results sheet, copy, and paste them into the box.</p>
-      <input type="file" accept=".csv,text/csv" onchange="handleFile(event)">
-      <div style="margin:14px 0 6px; font-size:12.5px; color:var(--ink-soft);">— or paste CSV data —</div>
-      <textarea id="pasteArea" placeholder="Paste your exported sheet data here..."></textarea>
-      <div class="btn-row">
-        <button class="btn" onclick="handlePasteAnalyze()">Analyze pasted data</button>
-      </div>
-      ${state.error ? `<div class="error-box">${state.error}</div>` : ''}
-    </div>
-  </div>`;
-}
-
-function renderMapping(){
-  const headerOptions = (selected) => state.headers.map(h=>`<option value="${h}" ${h===selected?'selected':''}>${h}</option>`).join('');
-  return `
-  <div class="wrap">
-    <div class="card">
-      <h3>Confirm columns</h3>
-      <p class="muted">${state.rawRows.length} rows found. I've guessed which columns to use — check they look right.</p>
-      <div class="map-row">
-        <span>Answers column</span>
-        <select onchange="setMapping('answers', this.value)">${headerOptions(state.mapping.answers)}</select>
-      </div>
-      <div class="map-row">
-        <span>Name column (optional)</span>
-        <select onchange="setMapping('name', this.value)">${headerOptions(state.mapping.name)}</select>
-      </div>
-      ${state.error ? `<div class="error-box">${state.error}</div>` : ''}
-      <div class="btn-row">
-        <button class="btn" onclick="runAnalysis()">Run analysis</button>
-        <button class="btn secondary" onclick="reset()">Start over</button>
-      </div>
-    </div>
   </div>`;
 }
 
@@ -452,6 +397,7 @@ function renderStudentView(){
   const list = state.studentScores.map((s,i)=>({...s, i, pct: s.total ? Math.round((s.correct/s.total)*100) : 0}));
 
   if(state.studentSort==='lowest') list.sort((a,b)=>a.pct-b.pct);
+  else if(state.studentSort==='time') list.sort((a,b)=>(a.timestamp||'').localeCompare(b.timestamp||''));
   else list.sort((a,b)=>a.name.localeCompare(b.name));
 
   const rows = list.map(s=>{
@@ -461,13 +407,14 @@ function renderStudentView(){
       ? s.wrongQs.map(w=>`Q${w.n} (picked ${w.given}, correct ${w.correct})`).join(', ')
       : 'None';
     const blankList = s.blankQs.length ? s.blankQs.map(n=>'Q'+n).join(', ') : 'None';
+    const subLine = `${s.correct}/${s.total} correct · ${s.wrong} wrong · ${s.blank} blank${s.timestamp ? ` · Submitted ${s.timestamp}` : ''}`;
     return `
     <div class="qrow ${isOpen?'open':''}">
       <div class="qrow-head" onclick="toggleStudent(${s.i})">
         <div class="qrow-num" style="width:auto; max-width:110px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${s.name}</div>
         <div class="qrow-bar-wrap">
           <div class="qrow-bar-track"><div class="qrow-bar-fill" style="width:${s.pct}%; background:${color};"></div></div>
-          <div class="qrow-sub">${s.correct}/${s.total} correct · ${s.wrong} wrong · ${s.blank} blank</div>
+          <div class="qrow-sub">${subLine}</div>
         </div>
         <div class="qrow-pct" style="color:${color};">${s.pct}%</div>
       </div>
@@ -482,6 +429,7 @@ function renderStudentView(){
     <div class="sort-tabs">
       <button class="${state.studentSort==='lowest'?'active':''}" onclick="setStudentSort('lowest')">Lowest score first</button>
       <button class="${state.studentSort==='name'?'active':''}" onclick="setStudentSort('name')">Alphabetical</button>
+      <button class="${state.studentSort==='time'?'active':''}" onclick="setStudentSort('time')">Submission order</button>
     </div>
     ${rows}
   `;
@@ -520,7 +468,6 @@ function render(){
   let body = '';
   if(state.screen==='select-test') body = renderSelectTest();
   else if(state.screen==='upload') body = renderUpload();
-  else if(state.screen==='mapping') body = renderMapping();
   else body = renderResults();
 
   const test = currentTest();

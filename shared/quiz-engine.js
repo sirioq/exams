@@ -460,7 +460,7 @@ function renderResults(){
       <div class="title">Results</div>
     </div>
     <div class="topbar-right">
-      <button class="btn" style="background:rgba(255,255,255,0.12); color:#fff;" onclick="restart()">Retake test</button>
+      <button class="btn" style="background:rgba(255,255,255,0.12); color:#fff;" onclick="location.href='../../index.html'">Back to home</button>
     </div>
   </div>
   <div class="screen">
