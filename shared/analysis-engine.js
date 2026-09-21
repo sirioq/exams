@@ -35,6 +35,7 @@ function switchTest(){
   state.screen = 'select-test';
   state.rawRows = [];
   state.headers = [];
+  state.partFilter = 'all';
   render();
 }
 
@@ -379,15 +380,20 @@ function renderQuestionView(){
     </div>`;
   }).join('');
 
+  const allQuestions = currentTest().questions;
+  const partCodes = Array.from(new Set(allQuestions.map(q=>q.part))).sort();
+  const partButtons = partCodes.map(code =>
+    `<button class="${state.partFilter===code?'active':''}" onclick="setPartFilter('${code}')">Part ${code}</button>`
+  ).join('');
+
   return `
     <div class="sort-tabs">
       <button class="${state.sortMode==='hardest'?'active':''}" onclick="setSortMode('hardest')">Hardest first</button>
       <button class="${state.sortMode==='number'?'active':''}" onclick="setSortMode('number')">Question order</button>
     </div>
     <div class="part-filter">
-      <button class="${state.partFilter==='all'?'active':''}" onclick="setPartFilter('all')">All 54</button>
-      <button class="${state.partFilter==='A'?'active':''}" onclick="setPartFilter('A')">Part A</button>
-      <button class="${state.partFilter==='B'?'active':''}" onclick="setPartFilter('B')">Part B</button>
+      <button class="${state.partFilter==='all'?'active':''}" onclick="setPartFilter('all')">All ${allQuestions.length}</button>
+      ${partButtons}
     </div>
     ${rows}
   `;

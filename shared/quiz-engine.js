@@ -8,13 +8,15 @@ const QUESTIONS = TEST_CONFIG.questions;
 const DIAGRAMS = TEST_CONFIG.diagrams;
 const TOTAL_SECONDS = TEST_CONFIG.totalSeconds;
 const RESULTS_FORM = TEST_CONFIG.resultsForm;
+const HAS_OPTIONAL_PARTS = Array.isArray(TEST_CONFIG.optionalParts) && TEST_CONFIG.optionalParts.length > 0;
 
 
 /* =========================================================================
    QUIZ ENGINE
    ========================================================================= */
 let state = {
-  screen:'start',       // start | test | results
+  screen: HAS_OPTIONAL_PARTS ? 'part-select' : 'start',   // part-select | start | test | results
+  chosenParts: [],       // optional-part codes the student picked (e.g. ['B','D'])
   current:0,
   answers:{},            // n -> key
   flags:{},              // n -> bool
@@ -26,6 +28,68 @@ let state = {
   submitStatus:'idle',   // idle | sending | sent | failed | unconfigured
 };
 
+/* The list of questions this particular student will actually sit:
+   the compulsory part(s) plus whichever optional parts they chose.
+   Tests with no optionalParts config (e.g. ENGAA) just get every question,
+   in the original order — identical to the old fixed-part behaviour. */
+function activeQuestions(){
+  if(!HAS_OPTIONAL_PARTS) return QUESTIONS;
+  const compulsory = TEST_CONFIG.compulsoryParts || [];
+  const allowed = compulsory.concat(state.chosenParts);
+  return QUESTIONS.filter(q => allowed.indexOf(q.part) !== -1);
+}
+
+function togglePart(code){
+  const i = state.chosenParts.indexOf(code);
+  if(i !== -1){
+    state.chosenParts.splice(i,1);
+  } else {
+    if(state.chosenParts.length >= TEST_CONFIG.chooseCount) return; // already at limit
+    state.chosenParts.push(code);
+  }
+  render();
+}
+
+function confirmPartSelection(){
+  if(state.chosenParts.length !== TEST_CONFIG.chooseCount){
+    alert(`Please choose exactly ${TEST_CONFIG.chooseCount} option${TEST_CONFIG.chooseCount===1?'':'s'} before continuing.`);
+    return;
+  }
+  state.screen = 'start';
+  render();
+}
+
+function renderPartSelect(){
+  const chosen = state.chosenParts;
+  const rows = TEST_CONFIG.optionalParts.map(p=>{
+    const n = QUESTIONS.filter(q=>q.part===p.code).length;
+    const isChosen = chosen.indexOf(p.code) !== -1;
+    return `
+    <div class="info-card" style="cursor:pointer; ${isChosen?'border-color:var(--accent); background:var(--accent-soft);':''}" onclick="togglePart('${p.code}')">
+      <div class="info-row" style="border:none; padding:0;">
+        <span style="font-weight:600;">${isChosen?'☑':'☐'} Part ${p.code} — ${p.name}</span>
+        <span>${n} questions</span>
+      </div>
+    </div>`;
+  }).join('');
+  const compulsoryNames = (TEST_CONFIG.compulsoryParts||[]).map(c => `Part ${c} — ${(TEST_CONFIG.partNames||{})[c]||c}`).join(', ');
+  return `
+  <div class="screen">
+    <div class="brand" style="color:var(--navy); margin-bottom:18px;">
+      <div class="kicker" style="color:var(--ink-soft)">${TEST_CONFIG.kicker}</div>
+      <h1>${TEST_CONFIG.title}</h1>
+      <div class="sub">Choose which sections you're sitting</div>
+    </div>
+    <div class="info-card">
+      <h4>Compulsory</h4>
+      <div style="font-size:14px;">${compulsoryNames}</div>
+    </div>
+    <h4 style="margin:20px 0 10px; color:var(--navy);">Choose ${TEST_CONFIG.chooseCount} of the following</h4>
+    ${rows}
+    <button class="start-btn" onclick="confirmPartSelection()" style="margin-top:16px;">Continue</button>
+  </div>`;
+}
+
 /* =========================================================================
    TEACHER RESULTS COLLECTION (Google Form auto-submit)
    Fill these in once the Google Form is set up, then results from every
@@ -34,7 +98,7 @@ let state = {
    ========================================================================= */
 
 function buildAnswersString(){
-  return QUESTIONS.map(q=>{
+  return activeQuestions().map(q=>{
     const given = state.answers[q.n];
     if(given===undefined) return `${q.n}:—(${q.answer})`;
     if(given===q.answer) return `${q.n}:${given}`;
@@ -57,8 +121,16 @@ function submitResultsToTeacher(s){
   const body = new URLSearchParams();
   body.append(RESULTS_FORM.entries.name, state.studentName || 'Unnamed');
   body.append(RESULTS_FORM.entries.score, `${s.correct}/${s.total}`);
-  body.append(RESULTS_FORM.entries.partA, `${s.partA.correct}/${s.partA.total}`);
-  body.append(RESULTS_FORM.entries.partB, `${s.partB.correct}/${s.partB.total}`);
+  if(RESULTS_FORM.entries.partA && RESULTS_FORM.entries.partB){
+    // Fixed two-part tests (e.g. ENGAA): keep the original separate fields.
+    body.append(RESULTS_FORM.entries.partA, `${s.partA.correct}/${s.partA.total}`);
+    body.append(RESULTS_FORM.entries.partB, `${s.partB.correct}/${s.partB.total}`);
+  } else if(RESULTS_FORM.entries.parts){
+    // Variable-part tests (e.g. NSAA, where each student picks different optional
+    // parts): one field with a compact breakdown across whichever parts they sat.
+    const summary = Object.keys(s.parts).map(code => `${code}:${s.parts[code].correct}/${s.parts[code].total}`).join(' ');
+    body.append(RESULTS_FORM.entries.parts, summary);
+  }
   body.append(RESULTS_FORM.entries.timeUsed, fmtTime(TOTAL_SECONDS-state.timeLeft));
   if(RESULTS_FORM.entries.answers){
     body.append(RESULTS_FORM.entries.answers, buildAnswersString());
@@ -150,7 +222,7 @@ function finishQuiz(){
 
 function confirmSubmit(){
   const answered = Object.keys(state.answers).length;
-  const remaining = 54-answered;
+  const remaining = activeQuestions().length - answered;
   const msg = remaining>0
     ? `You have ${remaining} unanswered question${remaining===1?'':'s'}. Submit anyway?`
     : `Submit your answers now?`;
@@ -158,17 +230,33 @@ function confirmSubmit(){
 }
 
 function restart(){
-  state = {screen:'start', current:0, answers:{}, flags:{}, timeLeft:TOTAL_SECONDS, timerId:null, reviewFilter:'all', reviewFocus:null, studentName:'', submitStatus:'idle'};
+  state = {screen: HAS_OPTIONAL_PARTS ? 'part-select' : 'start', chosenParts:[], current:0, answers:{}, flags:{}, timeLeft:TOTAL_SECONDS, timerId:null, reviewFilter:'all', reviewFocus:null, studentName:'', submitStatus:'idle'};
   render();
 }
 
 /* ---------- RENDER: START SCREEN ---------- */
 function renderStart(){
-  const nA = QUESTIONS.filter(q=>q.part==='A').length;
-  const nB = QUESTIONS.filter(q=>q.part==='B').length;
-  const nTotal = QUESTIONS.length;
+  const active = activeQuestions();
+  const nTotal = active.length;
   const mins = Math.round(TOTAL_SECONDS/60);
-  const partNames = TEST_CONFIG.partNames || {A:'Part A', B:'Part B'};
+  const partNames = TEST_CONFIG.partNames || {};
+
+  // Which part codes actually appear in this student's sitting, in a sensible order:
+  // compulsory parts first (as configured), then chosen optional parts in the order chosen.
+  const activePartCodes = HAS_OPTIONAL_PARTS
+    ? (TEST_CONFIG.compulsoryParts||[]).concat(state.chosenParts)
+    : Array.from(new Set(active.map(q=>q.part)));
+
+  const structureRows = activePartCodes.map(code=>{
+    const n = active.filter(q=>q.part===code).length;
+    const label = partNames[code] || code;
+    return `<div class="info-row"><span>Part ${code} — ${label}</span><span>${n} questions</span></div>`;
+  }).join('');
+
+  const switchLink = HAS_OPTIONAL_PARTS
+    ? `<div style="font-size:12.5px; margin-top:8px;"><a href="#" onclick="state.screen='part-select'; render(); return false;">change sections</a></div>`
+    : '';
+
   return `
   <div class="screen">
     <div class="brand" style="color:var(--navy); margin-bottom:18px;">
@@ -178,11 +266,11 @@ function renderStart(){
     </div>
     <div class="info-card">
       <h4>Test structure</h4>
-      <div class="info-row"><span>Part A — ${partNames.A}</span><span>${nA} questions</span></div>
-      <div class="info-row"><span>Part B — ${partNames.B}</span><span>${nB} questions</span></div>
+      ${structureRows}
       <div class="info-row"><span>Total</span><span>${nTotal} questions, 1 mark each</span></div>
       <div class="info-row"><span>Time limit</span><span>${mins} minutes</span></div>
       <div class="info-row"><span>Penalty for wrong answers</span><span>None</span></div>
+      ${switchLink}
     </div>
     <div class="info-card">
       <h4>Before you begin</h4>
@@ -237,14 +325,19 @@ function renderQuestion(q){
 }
 
 function navGridHTML(){
+  const active = activeQuestions();
   let rows = '';
-  ['A','B'].forEach(part=>{
+  const partCodes = HAS_OPTIONAL_PARTS
+    ? (TEST_CONFIG.compulsoryParts||[]).concat(state.chosenParts)
+    : Array.from(new Set(active.map(q=>q.part)));
+  partCodes.forEach(part=>{
     rows += `<div class="part-label">Part ${part}</div><div class="grid">`;
-    QUESTIONS.filter(q=>q.part===part).forEach(q=>{
+    active.forEach((q, pos)=>{
+      if(q.part !== part) return;
       const answered = state.answers[q.n]!==undefined;
       const flagged = !!state.flags[q.n];
-      const cur = q.n-1===state.current;
-      rows += `<button class="gbtn ${answered?'answered':''} ${flagged?'flagged':''} ${cur?'current':''}" onclick="goTo(${q.n-1}); closeDrawer();">${q.n}</button>`;
+      const cur = pos===state.current;
+      rows += `<button class="gbtn ${answered?'answered':''} ${flagged?'flagged':''} ${cur?'current':''}" onclick="goTo(${pos}); closeDrawer();">${q.n}</button>`;
     });
     rows += `</div>`;
   });
@@ -252,9 +345,10 @@ function navGridHTML(){
 }
 
 function renderTest(){
-  const q = QUESTIONS[state.current];
+  const active = activeQuestions();
+  const q = active[state.current];
   const answeredCount = Object.keys(state.answers).length;
-  const pct = Math.round((answeredCount/QUESTIONS.length)*100);
+  const pct = Math.round((answeredCount/active.length)*100);
   return `
   <div class="topbar">
     <div class="brand">
@@ -279,7 +373,7 @@ function renderTest(){
       <div class="bottom-nav">
         <button class="nav-btn" onclick="goTo(${state.current-1})" ${state.current===0?'disabled':''}>← Previous</button>
         <button class="icon-btn grid-toggle" onclick="openDrawer()">☰</button>
-        ${state.current===53
+        ${state.current===active.length-1
           ? `<button class="nav-btn primary" onclick="confirmSubmit()">Submit test</button>`
           : `<button class="nav-btn primary" onclick="goTo(${state.current+1})">Next →</button>`
         }
@@ -326,16 +420,22 @@ function closeDrawer(){
 /* ---------- RENDER: RESULTS SCREEN ---------- */
 function scoreData(){
   let correct=0, incorrect=0, blank=0;
-  let partA={correct:0,total:0}, partB={correct:0,total:0};
-  QUESTIONS.forEach(q=>{
-    const p = q.part==='A'?partA:partB;
+  const parts = {};
+  const active = activeQuestions();
+  active.forEach(q=>{
+    if(!parts[q.part]) parts[q.part] = {correct:0, total:0, label:(TEST_CONFIG.partNames||{})[q.part]||q.part};
+    const p = parts[q.part];
     p.total++;
     const given = state.answers[q.n];
     if(given===undefined){ blank++; }
     else if(given===q.answer){ correct++; p.correct++; }
     else { incorrect++; }
   });
-  return {correct,incorrect,blank,partA,partB,total:54};
+  const result = {correct,incorrect,blank,parts,total:active.length};
+  // Backward-compatible aliases for tests with the old fixed Part A/Part B shape (e.g. ENGAA)
+  result.partA = parts.A || {correct:0,total:0};
+  result.partB = parts.B || {correct:0,total:0};
+  return result;
 }
 
 function setReviewFilter(f){
@@ -346,7 +446,7 @@ function setReviewFilter(f){
 function reviewList(){
   const {reviewFilter} = state;
   let rows='';
-  QUESTIONS.forEach(q=>{
+  activeQuestions().forEach(q=>{
     const given = state.answers[q.n];
     let status = given===undefined ? 'blank' : (given===q.answer ? 'correct' : 'incorrect');
     if(reviewFilter!=='all' && reviewFilter!==status) return;
@@ -405,11 +505,13 @@ function renderReviewDetail(){
 }
 
 function resultsSummaryText(s){
+  const partLines = Object.keys(s.parts).map(code =>
+    `Part ${code} (${s.parts[code].label}): ${s.parts[code].correct}/${s.parts[code].total}`
+  ).join('\n');
   return `${TEST_CONFIG.title} — Results
 Name: ${state.studentName||'Unnamed'}
 Score: ${s.correct}/${s.total} (${Math.round((s.correct/s.total)*100)}%)
-Part A: ${s.partA.correct}/${s.partA.total}
-Part B: ${s.partB.correct}/${s.partB.total}
+${partLines}
 Time used: ${fmtTime(TOTAL_SECONDS-state.timeLeft)}
 Answers: ${buildAnswersString()}`;
 }
@@ -471,8 +573,7 @@ function renderResults(){
     ${renderSubmitStatus()}
 
     <div class="breakdown">
-      <div class="bd-card"><div class="n">${s.partA.correct}/${s.partA.total}</div><div class="l">Part A</div></div>
-      <div class="bd-card"><div class="n">${s.partB.correct}/${s.partB.total}</div><div class="l">Part B</div></div>
+      ${Object.keys(s.parts).map(code => `<div class="bd-card"><div class="n">${s.parts[code].correct}/${s.parts[code].total}</div><div class="l">Part ${code}</div></div>`).join('')}
     </div>
 
     <div class="info-card" style="margin-bottom:20px;">
@@ -499,7 +600,8 @@ function renderResults(){
 /* ---------- MAIN RENDER ---------- */
 function render(){
   let html='';
-  if(state.screen==='start') html = renderStart();
+  if(state.screen==='part-select') html = renderPartSelect();
+  else if(state.screen==='start') html = renderStart();
   else if(state.screen==='test') html = renderTest();
   else html = renderResults();
   app.innerHTML = html;
