@@ -13,7 +13,35 @@ tests/
     quiz.html                       ← thin shell, loads questions.js + the shared engine
     questions.js                    ← this test's 54 questions, diagrams, answer key, Form config
     questions-meta.js               ← lean copy (no diagrams) that registers this test with analysis.html
+  nsaa-2019-s1/
+    quiz.html
+    questions.js                    ← 90 questions across 5 parts, with optionalParts config (see below)
+    questions-meta.js
 ```
+
+## Tests with optional parts (like NSAA)
+
+NSAA's real format is Part A (compulsory) plus 2 of 4 optional parts (B/C/D/E), not a fixed set of
+questions everyone sits — so its `questions.js` declares a few extra fields that ENGAA's doesn't:
+
+```js
+compulsoryParts: ["A"],
+optionalParts: [
+  {code:"B", name:"Physics"},
+  {code:"C", name:"Chemistry"},
+  {code:"D", name:"Biology"},
+  {code:"E", name:"Advanced Mathematics and Advanced Physics"},
+],
+chooseCount: 2,
+```
+
+When this is present, the quiz shows a part-picker before the start screen, and only that student's
+compulsory + chosen questions are timed, scored, and submitted — everyone still gets 80 minutes and a
+54-question paper, just a different 54 depending on what they picked. A test with no `optionalParts`
+(like ENGAA) behaves exactly as before; this is purely additive.
+
+Because different students in the same class may sit different combinations, NSAA's Google Form needs a
+different shape from ENGAA's — see the Form setup notes for this test below.
 
 Push the whole `site/` folder (contents, not the folder itself) to the root of your GitHub Pages repo.
 Your links become:
