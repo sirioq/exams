@@ -359,8 +359,8 @@ const QUESTIONS = [
 {n:88, part:"E", text:`A light, vertical, copper wire of length 2.4 m and uniform cross-sectional area 2.0\u00d710\u207b\u2076 m$^2$ supports a load of mass 4.0 kg.</p><p>The Young modulus of copper is 1.2\u00d710\u00b9\u00b9 Pa.</p><p>What is the strain energy in the wire?</p><p style="font-size:13.5px; color:var(--ink-soft);">(gravitational field strength = 10 N kg\u207b\u00b9; assume that the wire obeys Hooke's law and that the cross-sectional area remains constant)`,
  options:[["A","8.0\u00d710\u207b\u2075 J"],["B","1.7\u00d710\u207b\u2074 J"],["C","4.0\u00d710\u207b\u2074 J"],["D","8.0\u00d710\u207b\u00b3 J"],["E","4.0\u00d710\u207b\u00b2 J"],["F","1.6\u00d710\u207b\u00b2 J"]], answer:"D"},
 
-{n:89, part:"E", text:`Find the complete set of values of $x$ for which</p><p style="text-align:center">$x^3-2x^2-7x-4 > 0$`,
- options:[["A","$x<-1$"],["B","$x>-1$"],["C","$-1<x<4$"],["D","$x<-1$ or $x>4$"],["E","$x<4$"],["F","$x>4$"]], answer:"F"},
+{n:89, part:"E", text:`Find the complete set of values of $x$ for which</p><p style="text-align:center">$x^3-2x^2-7x-4 \\gt 0$`,
+ options:[["A","$x\\lt-1$"],["B","$x\\gt-1$"],["C","$-1\\lt x\\lt4$"],["D","$x\\lt-1$ or $x\\gt4$"],["E","$x\\lt4$"],["F","$x\\gt4$"]], answer:"F"},
 
 {n:90, part:"E", text:`The velocity\u2013time graph is for an 80 kg person in a lift that is moving vertically upwards.`,
  diagram:"q90",
