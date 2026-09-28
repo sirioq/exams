@@ -82,3 +82,46 @@ happening:
 Nothing in `shared/` ever needs to change for a new test — that's the whole point of splitting it this way.
 If you ever do want to tweak shared behavior (say, add a new results-view feature), it only needs to be
 written once and every test picks it up immediately.
+
+---
+
+# Lessons learned / things to watch for
+
+These are real bugs found and fixed during earlier builds. Worth checking for on every new test.
+
+**1. `questions.js` and `questions-meta.js` can silently drift apart.**
+They hold the same question data (text/options/answers) — `questions.js` for the quiz, `questions-meta.js`
+for the analysis tool, minus diagrams. If a question gets corrected in one but not the other, the analysis
+tool can end up marking a genuinely correct answer as wrong (this happened with ENGAA Q44 and NSAA Q89).
+**Fix**: never hand-edit `questions-meta.js` separately. Always regenerate it fresh from `questions.js`
+(strip the `diagram` field; if any option contains an inline `<img>` — e.g. a graph-as-answer-options
+question — replace that option's text with a short placeholder like `"(graph — see quiz for image)"`
+before writing the meta file, or the file balloons to hundreds of KB). After any content fix, regenerate
+the meta file and re-diff it against the quiz's questions to confirm zero mismatches.
+
+**2. Raw `<` or `>` in question text/options can break HTML rendering.**
+Since question content is inserted as raw HTML, a pattern like `<x` (a `<` immediately followed by a
+letter) gets parsed as an opening tag rather than displayed as "less than" — this can silently swallow
+content until the next real `>` on the page. Digits, spaces, or dashes right after `<` are safe; a letter
+right after is not. **Fix**: write comparisons in KaTeX as `\lt` / `\gt` instead of literal `<` / `>`.
+**Critical gotcha**: when adding `\lt` inside a JS template literal, it must be written as `\\lt` (double
+backslash) in the source file — a single backslash in front of an unrecognized escape letter is silently
+dropped by JavaScript, turning `\lt` into just `lt`. Always verify by actually evaluating the file and
+printing the runtime string, not just eyeballing the source.
+
+**3. Diagram crops should be tight — just the figure, not the surrounding prose.**
+A crop that catches a sliver of the question text above or below the diagram creates ugly, confusing
+duplicate/truncated text baked permanently into the image (the app already renders that text separately
+via the `text`/`after` fields). Crop margins should hug the actual figure — axes, labels, arrows — and
+nothing else. Always view the crop before embedding it, not just before-and-after the page it came from.
+
+**4. Both tests' `questions-meta.js` files share the exact same filename.**
+Easy to swap between folders when uploading two files at once (this happened once — NSAA's file ended up
+in ENGAA's folder, making the picker show NSAA twice and ENGAA not at all). If a test picker ever looks
+wrong, check the `id:` field near the bottom of each `questions-meta.js` to confirm it's in the right folder.
+
+**5. Cross-check every answer against the answer key programmatically, not just mentally.**
+When transcribing a new test, write each part's questions, then immediately run a small script comparing
+every `answer` letter against the official key file before moving to the next part. This catches real
+transcription/reasoning slips that "I'm pretty sure I got this right" does not (three were caught this way
+during NSAA's build that would otherwise have shipped silently wrong).
