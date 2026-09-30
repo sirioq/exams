@@ -185,15 +185,21 @@ during NSAA's build that would otherwise have shipped silently wrong).
 
 **1. Decide the field structure**
 If the new test has a fixed number of sections everyone sits (like ENGAA's Part A + Part B), use fields: Name, Score, Part A, Part B, Time used, Answers. If it has optional/choose-N-of-M sections (like NSAA), use: Name, Score, Parts, Time used, Answers — the 'Parts' field holds a free-text breakdown since different students sit different combinations. Tell me which structure applies when you send me the details.
+
 **2. Create the new Google Form**
 Add one short-answer question per field from Step 1, in any order. Don't mark them as required — the quiz always fills every field itself, but a required field can silently block submission if something's ever slightly off.
+
 **3. Link it to your existing spreadsheet**
 In the Form's Responses tab, click the green Sheets icon → 'Select existing spreadsheet' → choose the same results spreadsheet you already use. Google creates a new tab automatically (e.g. 'Form responses 3'). This step is easy to skip by accident — it's exactly what went wrong with NSAA last time, where the Form worked but nothing reached the sheet until this was done explicitly.
+
 **4. Get the entry IDs**
 In the Form editor, use the three-dot menu → 'Get pre-filled link'. Fill in a placeholder word for every field (e.g. 'name', 'score', 'parts') and click 'Get link'. Copy that generated URL — it contains an entry.XXXXXXX= number for each field. Send me the whole URL and I'll extract them all at once, same as last time.
+
 **5. Note the new tab name**
 Check the tab label at the bottom of your spreadsheet for the tab Google just created. Send me the exact name (capitalisation matters) along with the entry IDs.
+
 **6. Confirm the spreadsheet ID**
 If it's the same spreadsheet as before, just say so — I already have that ID. If it's a different spreadsheet, send its ID from the sheet's URL.
+
 **7. Check sharing, if anyone new needs access**
 Anyone who'll sign in to the analysis tool for this test needs view access to the spreadsheet, same as before. If it's a new person (not already a Google OAuth test user from ENGAA/NSAA), they'll also need adding under Audience → Test users in the same Google Cloud project — no new project or Client ID needed, that part's already done and covers every test.
