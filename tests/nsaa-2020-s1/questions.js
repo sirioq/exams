@@ -66,7 +66,7 @@ const QUESTIONS = [
  options:[["A","–27"],["B","–9"],["C","0"],["D","3"],["E","15"]], answer:"A"},
 
 {n:11, part:"A", text:`The number of pairs of winter boots sold on a day is inversely proportional to the cube of the outside temperature on that day, measured in °C.</p><p>On a day when the outside temperature is 8 °C, 250 pairs of boots are sold.</p><p>The next day, when the outside temperature is $x$ °C, the number of pairs of boots sold is 700% more than on the previous day.</p><p>What is the value of $x$?`,
- options:[["A","$2$"],["B","$4$"],["C","$\\dfrac{8){\\sqrt[3]{7}}$"],["D","$8\\sqrt[3]{7}$"],["E","$16$"]], answer:"B"},
+ options:[["A","$2$"],["B","$4$"],["C","$\\dfrac{8}{\\sqrt[3]{7}}$"],["D","$8\\sqrt[3]{7}$"],["E","$16$"]], answer:"B"},
 
 {n:12, part:"A", text:`The table shows statistics relating to the test marks of two groups of students.`,
  after:`<table style="margin:10px auto;border-collapse:collapse;font-size:14px;" border="1" cellpadding="6"><tr><th></th><th>number of students</th><th>mean</th><th>range</th></tr><tr><td>group X</td><td>10</td><td>36</td><td>16</td></tr><tr><td>group Y</td><td>20</td><td>48</td><td>21</td></tr></table><p>The results for the two groups of students are combined.</p><p>What can be deduced about the mean and range of the combined results?`,
