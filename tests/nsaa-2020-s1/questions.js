@@ -59,14 +59,14 @@ const QUESTIONS = [
 {n:8, part:"A", text:`The equilateral triangle $PQR$ has sides of length 8 cm.</p><p>A circle, centre $O$, passes through each of the vertices of the triangle.</p><p>Find an expression for the circumference of the circle, in cm.`,
  options:[["A","$\\dfrac{8}{\\pi\\sin 60°}$"],["B","$\\dfrac{8\\pi}{\\sin 60°}$"],["C","$\\dfrac{8}{\\pi\\cos 60°}$"],["D","$\\dfrac{8\\pi}{\\cos 60°}$"],["E","$\\dfrac{8}{\\pi\\tan 60°}$"],["F","$\\dfrac{8\\pi}{\\tan 60°}$"]], answer:"B"},
 
-{n:9, part:"A", text:`Which one of the following expressions is equivalent to</p><p style="text-align:center">$\\dfrac{a}{\\frac{b}{c}} - \\dfrac{\\frac{a}{b}}{c}$`,
- options:[["A","0"],["B","$\\dfrac{a(b^2-1)}{bc}$"],["C","$\\dfrac{a(b^2-c^2)}{bc}$"],["D","$\\dfrac{a^2b^2-c^2}{abc}$"],["E","$\\dfrac{a(c^2-1)}{bc}$"],["F","$\\dfrac{a^2c^2-b^2}{abc}$"],["G","$\\dfrac{b^2-a^2}{abc}$"]], answer:"E"},
+{n:9, part:"A", text:`Which one of the following expressions is equivalent to</p><p style="text-align:center">$\\dfrac{a}{b/c} - \\dfrac{a/b}{c}$`,
+ options:[["A","$0$"],["B","$\\dfrac{a(b^2-1)}{bc}$"],["C","$\\dfrac{a(b^2-c^2)}{bc}$"],["D","$\\dfrac{a^2b^2-c^2}{abc}$"],["E","$\\dfrac{a(c^2-1)}{bc}$"],["F","$\\dfrac{a^2c^2-b^2}{abc}$"],["G","$\\dfrac{b^2-a^2}{abc}$"]], answer:"E"},
 
 {n:10, part:"A", text:`When the expression</p><p style="text-align:center">$(2x+3)^2 - (x-3)^2$</p><p>is written in the form $p(x+q)^2 + r$, where $p$, $q$ and $r$ are constants, what is the value of $r$?`,
  options:[["A","–27"],["B","–9"],["C","0"],["D","3"],["E","15"]], answer:"A"},
 
 {n:11, part:"A", text:`The number of pairs of winter boots sold on a day is inversely proportional to the cube of the outside temperature on that day, measured in °C.</p><p>On a day when the outside temperature is 8 °C, 250 pairs of boots are sold.</p><p>The next day, when the outside temperature is $x$ °C, the number of pairs of boots sold is 700% more than on the previous day.</p><p>What is the value of $x$?`,
- options:[["A","2"],["B","4"],["C","$\\sqrt[3]{7}\\times8$"],["D","$\\sqrt[3]{8}\\times7$"],["E","16"]], answer:"B"},
+ options:[["A","$2$"],["B","$4$"],["C","$\\sqrt[3]{7}\\times8$"],["D","$\\sqrt[3]{8}\\times7$"],["E","$16$"]], answer:"B"},
 
 {n:12, part:"A", text:`The table shows statistics relating to the test marks of two groups of students.`,
  after:`<table style="margin:10px auto;border-collapse:collapse;font-size:14px;" border="1" cellpadding="6"><tr><th></th><th>number of students</th><th>mean</th><th>range</th></tr><tr><td>group X</td><td>10</td><td>36</td><td>16</td></tr><tr><td>group Y</td><td>20</td><td>48</td><td>21</td></tr></table><p>The results for the two groups of students are combined.</p><p>What can be deduced about the mean and range of the combined results?`,
