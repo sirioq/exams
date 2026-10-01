@@ -57,7 +57,7 @@ const QUESTIONS = [
  options:[["A","2"],["B","$\\dfrac{3}{2}$"],["C","$\\dfrac{1}{2}$"],["D","–4"],["E","–13"],["F","–22"],["G","–26"],["H","–34"]], answer:"F"},
 
 {n:8, part:"A", text:`The equilateral triangle $PQR$ has sides of length 8 cm.</p><p>A circle, centre $O$, passes through each of the vertices of the triangle.</p><p>Find an expression for the circumference of the circle, in cm.`,
- options:[["A","$\\dfrac{8}{\\pi\\sin 60°}$"],["B","$\\dfrac{8\\pi}{\\sin 60°}$"],["C","$\\dfrac{8}{\\pi\\cos 60°}$"],["D","$\\dfrac{8\\pi}{\\cos 60°}$"],["E","$\\dfrac{8}{\\pi\\tan 60°}$"],["F","$\\dfrac{8\\pi}{\\tan 60°}$"]], answer:"B"},
+ options:[["A","$\\dfrac{\\sin 60°}{8\\pi}$"],["B","$\\dfrac{8\\pi}{\\sin 60°}$"],["C","$\\dfrac{\\cos 60°}{8\\pi}$"],["D","$\\dfrac{8\\pi}{\\cos 60°}$"],["E","$\\dfrac{\\tan 60°}{8\\pi}$"],["F","$\\dfrac{8\\pi}{\\tan 60°}$"]], answer:"B"},
 
 {n:9, part:"A", text:`Which one of the following expressions is equivalent to</p><p style="text-align:center">$\\dfrac{a}{b/c} - \\dfrac{a/b}{c}$`,
  options:[["A","$0$"],["B","$\\dfrac{a(b^2-1)}{bc}$"],["C","$\\dfrac{a(b^2-c^2)}{bc}$"],["D","$\\dfrac{a^2b^2-c^2}{abc}$"],["E","$\\dfrac{a(c^2-1)}{bc}$"],["F","$\\dfrac{a^2c^2-b^2}{abc}$"],["G","$\\dfrac{b^2-a^2}{abc}$"]], answer:"E"},
