@@ -87,7 +87,7 @@ const QUESTIONS = [
  options:[["A","$\\sqrt{y^2 + x^2} \\sin 61°$"],["B","$\\sqrt{y^2 - x^2} \\sin 61°$"],["C","$\\sqrt{y^2 + x^2} \\cos 61°$"],["D","$\\sqrt{y^2 - x^2} \\cos 61°$"],["E","$\\dfrac{\\sqrt{y^2 + x^2}}{\\sin 61°}$"],["F","$\\dfrac{\\sqrt{y^2 - x^2}}{\\sin 61°}$"],["G","$\\dfrac{\\sqrt{y^2 + x^2}}{\\cos 61°}$"],["H","$\\dfrac{\\sqrt{y^2 - x^2}}{\\cos 61°}$"]], answer:"F"},
 
 {n:17, part:"A", text:`Two vertices of a square are at $(1, 1)$ and $(3, 5)$.</p><p>What is the difference between the perimeters of the largest and smallest possible squares that can be drawn with these points as two of their vertices?`,
- options:[["A","$0$"],["B","$4\\sqrt{3}(2 - 2\\sqrt{2})$"],["C","$4\\sqrt{3}(\\sqrt{2}-1)$"],["D","$4\\sqrt{5}(2-\\sqrt{2})$"],["E","$4\\sqrt{5} - (\\sqrt{2}-1)$"],["F","$4\\sqrt{13} (2-\\sqrt{2})$"],["G","$4\\sqrt{13} (\\sqrt{2}-1)$"],["H","$4\\sqrt{3}\\sqrt{5}(2 - \\sqrt{2})$"]], answer:"D"},
+ options:[["A","$0$"],["B","$4\\sqrt{3}(2 - \\sqrt{2})$"],["C","$4\\sqrt{3}(\\sqrt{2}-1)$"],["D","$4\\sqrt{5}(2-\\sqrt{2})$"],["E","$4\\sqrt{5} (\\sqrt{2}-1)$"],["F","$4\\sqrt{13} (2-\\sqrt{2})$"],["G","$4\\sqrt{13} (\\sqrt{2}-1)$"],["H","$4\\sqrt{3}\\sqrt{5}(2 - \\sqrt{2})$"]], answer:"D"},
 
 {n:18, part:"A", text:`The quadratic equation $2x^2 - px - 4 = 0$, where $p$ is a positive constant, has two solutions that differ by 6.</p><p>What is the value of $p$?`,
  options:[["A","2"],["B","$4\\sqrt{7}$"],["C","12"],["D","$4\\sqrt{11}$"],["E","$4\\sqrt{34}$"],["F","$6\\sqrt{30}$"]], answer:"B"},
