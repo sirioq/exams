@@ -300,7 +300,7 @@ function renderQuestion(q){
   let html = `
   <div class="q-card">
     <div class="q-meta">
-      <div><span class="q-number">QUESTION ${q.n} OF 54</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
+      <div><span class="q-number">QUESTION ${q.n} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
       <button class="flag-btn ${flagged?'on':''}" onclick="toggleFlag(${q.n})">${flagged?'★ Flagged':'☆ Flag for review'}</button>
     </div>
     <div class="q-text"><p>${q.text}</p>
@@ -361,7 +361,7 @@ function renderTest(){
     </div>
   </div>
   <div class="progress-strip">
-    <span>${answeredCount} of 54 answered</span>
+    <span>${answeredCount} of ${active.length} answered</span>
     <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
     <span>${pct}%</span>
   </div>
@@ -481,7 +481,7 @@ function renderReviewDetail(){
   const given = state.answers[q.n];
   let html = `<div class="q-card" id="reviewDetail" style="margin-top:8px;">
     <div class="q-meta">
-      <div><span class="q-number">QUESTION ${q.n} OF 54</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
+      <div><span class="q-number">QUESTION ${q.n} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
       <button class="link-btn" onclick="closeReviewDetail()">Close ×</button>
     </div>
     <div class="q-text"><p>${q.text}</p>`;
@@ -586,7 +586,7 @@ function renderResults(){
 
     <h4 style="font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin-bottom:10px;">Review your answers</h4>
     <div class="filter-tabs">
-      <button class="${state.reviewFilter==='all'?'active':''}" onclick="setReviewFilter('all')">All 54</button>
+      <button class="${state.reviewFilter==='all'?'active':''}" onclick="setReviewFilter('all')">All ${s.correct+s.incorrect+s.blank}</button>
       <button class="${state.reviewFilter==='incorrect'?'active':''}" onclick="setReviewFilter('incorrect')">Incorrect</button>
       <button class="${state.reviewFilter==='blank'?'active':''}" onclick="setReviewFilter('blank')">Blank</button>
       <button class="${state.reviewFilter==='correct'?'active':''}" onclick="setReviewFilter('correct')">Correct</button>
