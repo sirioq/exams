@@ -315,9 +315,10 @@ function renderQuestion(q){
   html += `<div class="options">`;
   q.options.forEach(([key,text])=>{
     const sel = selected===key ? 'selected':'';
+    const content = (q.optionDiagrams && q.optionDiagrams[key]) ? DIAGRAMS[q.optionDiagrams[key]] : text;
     html += `<div class="option ${sel}" onclick="selectAnswer(${q.n},'${key}')">
       <div class="option-key">${key}</div>
-      <div class="option-text">${text}</div>
+      <div class="option-text">${content}</div>
     </div>`;
   });
   html += `</div></div>`;
@@ -492,9 +493,10 @@ function renderReviewDetail(){
     let cls='';
     if(key===q.answer) cls='correct';
     else if(key===given) cls='incorrect';
+    const content = (q.optionDiagrams && q.optionDiagrams[key]) ? DIAGRAMS[q.optionDiagrams[key]] : text;
     html += `<div class="option ${cls}">
       <div class="option-key">${key}</div>
-      <div class="option-text">${text}${key===q.answer?' &nbsp;<strong style="color:var(--answered); font-family:var(--sans); font-size:12.5px;">(correct answer)</strong>':''}${key===given && key!==q.answer?' &nbsp;<strong style="color:var(--wrong); font-family:var(--sans); font-size:12.5px;">(your answer)</strong>':''}</div>
+      <div class="option-text">${content}${key===q.answer?' &nbsp;<strong style="color:var(--answered); font-family:var(--sans); font-size:12.5px;">(correct answer)</strong>':''}${key===given && key!==q.answer?' &nbsp;<strong style="color:var(--wrong); font-family:var(--sans); font-size:12.5px;">(your answer)</strong>':''}</div>
     </div>`;
   });
   if(given===undefined){
