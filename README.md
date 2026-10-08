@@ -1,24 +1,4 @@
-# Structure1
-Decide the field structure
-If the new test has a fixed number of sections everyone sits (like ENGAA's Part A + Part B), use fields: Name, Score, Part A, Part B, Time used, Answers. If it has optional/choose-N-of-M sections (like NSAA), use: Name, Score, Parts, Time used, Answers — the 'Parts' field holds a free-text breakdown since different students sit different combinations. Tell me which structure applies when you send me the details.
-2
-Create the new Google Form
-Add one short-answer question per field from Step 1, in any order. Don't mark them as required — the quiz always fills every field itself, but a required field can silently block submission if something's ever slightly off.
-3
-Link it to your existing spreadsheet
-In the Form's Responses tab, click the green Sheets icon → 'Select existing spreadsheet' → choose the same results spreadsheet you already use. Google creates a new tab automatically (e.g. 'Form responses 3'). This step is easy to skip by accident — it's exactly what went wrong with NSAA last time, where the Form worked but nothing reached the sheet until this was done explicitly.
-4
-Get the entry IDs
-In the Form editor, use the three-dot menu → 'Get pre-filled link'. Fill in a placeholder word for every field (e.g. 'name', 'score', 'parts') and click 'Get link'. Copy that generated URL — it contains an entry.XXXXXXX= number for each field. Send me the whole URL and I'll extract them all at once, same as last time.
-5
-Note the new tab name
-Check the tab label at the bottom of your spreadsheet for the tab Google just created. Send me the exact name (capitalisation matters) along with the entry IDs.
-6
-Confirm the spreadsheet ID
-If it's the same spreadsheet as before, just say so — I already have that ID. If it's a different spreadsheet, send its ID from the sheet's URL.
-7
-Check sharing, if anyone new needs access
-Anyone who'll sign in to the analysis tool for this test needs view access to the spreadsheet, same as before. If it's a new person (not already a Google OAuth test user from ENGAA/NSAA), they'll also need adding under Audience → Test users in the same Google Cloud project — no new project or Client ID needed, that part's already done and covers every test.
+# Structure
 
 ```
 index.html                          ← landing page, links to every test + the analysis tool
@@ -74,44 +54,11 @@ test — you never need to touch Google Cloud Console again when adding a new te
 
 ---
 
-# Getting diagrams into a new test
-
-Don't ask Claude to crop diagrams out of the PDF by eye — it can't judge pixel boundaries reliably and the
-crops come out inconsistent. Instead, cropping is a separate manual step done with a standalone browser
-tool ("Diagram Cropper"), and the file it produces is what gets handed to Claude alongside the PDF and
-answer key.
-
-**Tool**: https://claude.ai/artifact/Bx1LDGLvNQySUfFBzgn2EV — runs entirely in the browser, nothing uploads
-anywhere. If it's ever lost, ask Claude to rebuild it: an HTML page using pdf.js that lets you load a PDF,
-drag a box around a diagram, and export the crop as base64.
-
-**Workflow per new test**:
-1. Set the **Test ID** field to the new test's folder name (e.g. `nsaa-2020-s1`) — this namespaces the
-   batch so it doesn't mix with another test's images.
-2. Load the PDF, flip to the right page, drag a box tightly around each diagram (see lesson 3 below —
-   hug the figure, no surrounding question text).
-3. For each crop, choose **Add as**:
-   - **Question diagram** — the figure that sits with the question stem. Leave the label blank normally;
-     if one question needs more than one image (e.g. a before/after pair), give each one a short label
-     like `b`, `c` so they export as distinct keys (`q11`, `q11b`, `q11c`).
-   - **Answer option image** — when the options themselves are diagrams/graphs rather than text. Pick the
-     option letter (A–G).
-4. Repeat for every diagram in the paper, checking each crop's preview before adding it to the batch.
-5. When the whole paper is done, click **Download DIAGRAMS block (.js)**. This gives one file,
-   `<test-id>-diagrams.js`, containing the `DIAGRAMS` object plus a ready-to-paste `options: [...]` block
-   for every question that has image options.
-
-**Handing it to Claude**: give the PDF, the answer key, and this `-diagrams.js` file together when starting
-the build. Claude inserts the `DIAGRAMS` object as-is and merges each `options` block into the matching
-question — no re-deriving or re-encoding base64 by hand.
-
----
-
 # Adding a new test
 
-Give me the new test's PDF + answer key + a `<test-id>-diagrams.js` file (see "Getting diagrams into a new
-test" above for how to produce that) the same way as before (transcribe, cross-check). Once that's done,
-here's what gets added — I'll do all of this, this checklist is just so you know what's happening:
+Give me the new test's PDF + answer key the same way as before (crop diagrams, transcribe, cross-check).
+Once that's done, here's what gets added — I'll do all of this, this checklist is just so you know what's
+happening:
 
 1. **`tests/<new-test-id>/questions.js`** — same shape as `tests/engaa-2018-s1/questions.js`:
    a `window.TEST_CONFIG` object with `id`, `title`, `shortTitle`, `kicker`, `totalSeconds`, `partNames`,
@@ -135,6 +82,84 @@ here's what gets added — I'll do all of this, this checklist is just so you kn
 Nothing in `shared/` ever needs to change for a new test — that's the whole point of splitting it this way.
 If you ever do want to tweak shared behavior (say, add a new results-view feature), it only needs to be
 written once and every test picks it up immediately.
+
+---
+
+# Reading math-heavy and diagram-heavy pages
+
+Plain text extraction (`pdftotext`, `pdfplumber`, etc.) is blind to layout. It reconstructs "lines" by
+grouping glyphs that share a y-coordinate (baseline) and reading left-to-right within each baseline.
+That works fine for prose — which is why most of a question paper transcribes cleanly — but it falls
+apart wherever a page has more than one baseline stacked in the same spot:
+
+- **A single stacked fraction** (numerator line, bar, denominator line) usually still extracts
+  recognisably, because there's only one of them at that position on the page.
+- **A column of several fraction-based answer options** (e.g. 6–8 lettered options, each its own
+  fraction) breaks badly: every numerator ends up on one baseline, every denominator on another, read
+  independently and concatenated in whatever order the PDF's internal glyph sequence used — which is
+  usually *not* visual reading order. The result is unreadable fragments with no reliable way to tell
+  which numerator belongs with which denominator or which letter.
+- Surds, exponents, and other multi-baseline notation have the same failure mode to a lesser degree.
+
+**Symptom to watch for:** a transcribed question whose options are short, fragmented, and don't read as
+sentences or clean expressions — isolated digits/operators/letters with no obvious structure. That's the
+signal the text layer scrambled it, not that the original paper is actually written that way.
+
+**Fix — rasterize the page and read it directly, like a person would:**
+
+```bash
+# find which physical PDF page a question is on (search the plain-text dump for a nearby fixed phrase)
+pdftotext -layout questionpaper.pdf dump.txt
+# then locate the page split index for the question, or just grep the printed page number in the footer
+
+# render just that one page as an image
+pdftoppm -png -r 200 -f <page> -l <page> questionpaper.pdf /tmp/pageout
+```
+Then view the resulting PNG directly. This sidesteps the baseline-reordering problem entirely, because
+it reads the actual visual layout instead of a reconstructed (and potentially scrambled) text stream.
+200 DPI is enough to read text/equations clearly; it does not need to be print quality.
+
+**Do this proactively, not reactively.** Scan the question paper for pages that look math-dense (lots of
+short fraction-like options, surds, or a grid of small diagrams used as answer choices) *before*
+transcribing them, and rasterize those specific pages up front. Waiting for an answer-key mismatch to
+flag a bad transcription only catches questions where the *letter* happens to come out wrong — a
+question can have the correct answer letter by chance while every other option on it is fabricated
+nonsense, and that only gets caught by rendering and reading the page.
+
+---
+
+# Diagram cropping methodology
+
+Freehand/eyeballed cropping (picking pixel coordinates by guessing from a preview) is how lesson #3
+below happens — margins that are too loose (catching stray question text) or too tight (clipping axis
+labels). It also makes it easy to miss that a question has *more than one* diagram to capture — see the
+new lesson #6.
+
+**Better approach — compute the crop from the PDF's own geometry, then verify by eye:**
+
+1. **Render the full page** at a reasonable zoom (`page.get_pixmap()` in PyMuPDF, or `pdftoppm`) and look
+   at it to find the diagram(s) and, for multi-part answer options, each option's letter position.
+2. **Get the candidate bounding box programmatically, not by eyeballing pixels:**
+   - `page.get_drawings()` (PyMuPDF) returns the actual vector path geometry — exact rectangles for every
+     line/curve/shape the PDF draws, including axes and plotted curves. This is precise in a way a
+     hand-picked pixel box never is.
+   - `page.get_text("dict")` gives exact positions for the option-letter labels (A, B, C, ...), which is
+     how you find where each option starts when several small diagrams are laid out in a grid (e.g. a
+     3×2 grid of six answer-option graphs).
+   - For a grid of options, cluster the drawing paths and text spans into per-option groups by which
+     option's region each one's centre falls inside, then take the union of each group's rects as that
+     option's bounding box. Add a few points of uniform padding.
+3. **Render the computed crop and look at it before trusting it.** This step is not optional. In testing
+   this on an actual paper, the first pass at the row boundaries between options was wrong by about
+   30pt — not enough to be obviously broken from the numbers, but enough that one option's crop caught
+   the neighbouring option's axis labels and was missing its own. The only way that was caught was by
+   rendering each candidate crop and visually confirming it was tight to its own figure, labels included,
+   nothing bled in from a neighbour. Treat the computed box as a strong first guess, not a finished crop.
+4. **Export at a high enough zoom that the embedded image is crisp**, not just large enough to read during
+   the check (a 4x zoom matrix, i.e. ~288 DPI, worked well).
+
+This replaces freehand cropping going forward — it's both faster and more accurate, for a single stem
+diagram as well as for grids of several small answer-option diagrams on one page.
 
 ---
 
@@ -167,8 +192,6 @@ A crop that catches a sliver of the question text above or below the diagram cre
 duplicate/truncated text baked permanently into the image (the app already renders that text separately
 via the `text`/`after` fields). Crop margins should hug the actual figure — axes, labels, arrows — and
 nothing else. Always view the crop before embedding it, not just before-and-after the page it came from.
-Use the Diagram Cropper tool (see "Getting diagrams into a new test" above) rather than hand-cropping or
-asking Claude to guess coordinates from the PDF.
 
 **4. Both tests' `questions-meta.js` files share the exact same filename.**
 Easy to swap between folders when uploading two files at once (this happened once — NSAA's file ended up
@@ -181,28 +204,26 @@ every `answer` letter against the official key file before moving to the next pa
 transcription/reasoning slips that "I'm pretty sure I got this right" does not (three were caught this way
 during NSAA's build that would otherwise have shipped silently wrong).
 
-# Google Forms
+Note the limit of this check, though: it only catches a wrong *answer letter*. A question can have every
+distractor option fabricated or garbled while the marked-correct option happens to be right — the
+cross-check passes and the question still ships broken. This is exactly what happened with several
+stacked-fraction questions in the 2020 build (see "Reading math-heavy and diagram-heavy pages" above):
+the key cross-check was clean, but the wrong-answer options were guesses dressed up to look plausible
+until someone actually read the original page.
 
-**1. Decide the field structure**
-If the new test has a fixed number of sections everyone sits (like ENGAA's Part A + Part B), use fields: Name, Score, Part A, Part B, Time used, Answers. If it has optional/choose-N-of-M sections (like NSAA), use: Name, Score, Parts, Time used, Answers — the 'Parts' field holds a free-text breakdown since different students sit different combinations. Tell me which structure applies when you send me the details.
+**6. A diagram-based question can need more than one image — check before assuming a single stem diagram
+covers it.**
+Some questions use a diagram as the *question stem* (e.g. "the diagram shows..."), others use diagrams
+*as the answer options themselves* (e.g. "which of the following diagrams..." with seven small ion
+structures, or six small graphs, as options A–G). A diagrams file can easily capture the former and
+silently omit the latter if whoever built it didn't check each math/science question that references
+"the diagram" for whether the *options* are also diagrams. If a question's options are things like
+"graph", "diagram", or bare letters with no other text, assume they're images until confirmed otherwise,
+and locate/crop them specifically (see "Diagram cropping methodology" above) rather than shipping
+placeholder option text.
 
-**2. Create the new Google Form**
-Add one short-answer question per field from Step 1, in any order. Don't mark them as required — the quiz always fills every field itself, but a required field can silently block submission if something's ever slightly off.
-
-**3. Link it to your existing spreadsheet**
-In the Form's Responses tab, click the green Sheets icon → 'Select existing spreadsheet' → choose the same results spreadsheet you already use. Google creates a new tab automatically (e.g. 'Form responses 3'). 
-
-**4. Publish the Form** 
-Click the button on the top right of the Forms page to publish. Without this step the data doesn't get collected and silently fails.
-
-**5. Get the entry IDs**
-In the Form editor, use the three-dot menu → 'Get pre-filled link'. Fill in a placeholder word for every field (e.g. 'name', 'score', 'parts') and click 'Get link'. Copy that generated URL — it contains an entry.XXXXXXX= number for each field. Send me the whole URL and I'll extract them all at once, same as last time.
-
-**6. Note the new tab name**
-Check the tab label at the bottom of your spreadsheet for the tab Google just created. Send me the exact name (capitalisation matters) along with the entry IDs.
-
-**7. Confirm the spreadsheet ID**
-If it's the same spreadsheet as before, just say so — I already have that ID. If it's a different spreadsheet, send its ID from the sheet's URL.
-
-**8. Check sharing, if anyone new needs access**
-Anyone who'll sign in to the analysis tool for this test needs view access to the spreadsheet, same as before. If it's a new person (not already a Google OAuth test user from ENGAA/NSAA), they'll also need adding under Audience → Test users in the same Google Cloud project — no new project or Client ID needed, that part's already done and covers every test.
+**7. When math options transcribe as unreadable fragments, don't guess and move on — rasterize the page.**
+A stacked-fraction answer list that extracts as scrambled digits/operators is not a lost cause requiring
+a plausible-looking reconstruction; see "Reading math-heavy and diagram-heavy pages" above. Treat garbled
+extraction as a signal to render and read the actual page, not as a prompt to fill in something that
+merely looks like a reasonable multiple-choice option.
