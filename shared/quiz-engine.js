@@ -312,7 +312,7 @@ function renderQuestion(q){
     html += q.after;
   }
   html += `</div>`;
-  html += `<div class="options">`;
+  html += `<div class="options ${q.optionDiagrams ? 'options-grid' : ''}">`;
   q.options.forEach(([key,text])=>{
     const sel = selected===key ? 'selected':'';
     const content = (q.optionDiagrams && q.optionDiagrams[key]) ? DIAGRAMS[q.optionDiagrams[key]] : text;
@@ -488,7 +488,7 @@ function renderReviewDetail(){
     <div class="q-text"><p>${q.text}</p>`;
   if(q.diagram) html += `<div class="q-diagram">${DIAGRAMS[q.diagram]}${q.caption?`<div class="diagram-caption">${q.caption}</div>`:''}</div>`;
   if(q.after) html += q.after;
-  html += `</div><div class="options">`;
+  html += `</div><div class="options ${q.optionDiagrams ? 'options-grid' : ''}">`;
   q.options.forEach(([key,text])=>{
     let cls='';
     if(key===q.answer) cls='correct';
