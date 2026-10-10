@@ -300,7 +300,7 @@ function renderQuestion(q){
   let html = `
   <div class="q-card">
     <div class="q-meta">
-      <div><span class="q-number">QUESTION ${q.n} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
+      <div><span class="q-number">QUESTION ${state.current+1} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
       <button class="flag-btn ${flagged?'on':''}" onclick="toggleFlag(${q.n})">${flagged?'★ Flagged':'☆ Flag for review'}</button>
     </div>
     <div class="q-text"><p>${q.text}</p>
@@ -338,7 +338,7 @@ function navGridHTML(){
       const answered = state.answers[q.n]!==undefined;
       const flagged = !!state.flags[q.n];
       const cur = pos===state.current;
-      rows += `<button class="gbtn ${answered?'answered':''} ${flagged?'flagged':''} ${cur?'current':''}" onclick="goTo(${pos}); closeDrawer();">${q.n}</button>`;
+      rows += `<button class="gbtn ${answered?'answered':''} ${flagged?'flagged':''} ${cur?'current':''}" onclick="goTo(${pos}); closeDrawer();">${pos+1}</button>`;
     });
     rows += `</div>`;
   });
@@ -447,13 +447,13 @@ function setReviewFilter(f){
 function reviewList(){
   const {reviewFilter} = state;
   let rows='';
-  activeQuestions().forEach(q=>{
+  activeQuestions().forEach((q,pos)=>{
     const given = state.answers[q.n];
     let status = given===undefined ? 'blank' : (given===q.answer ? 'correct' : 'incorrect');
     if(reviewFilter!=='all' && reviewFilter!==status) return;
     const label = status==='correct' ? '✓ Correct' : status==='incorrect' ? `✗ Incorrect` : '— Blank';
     rows += `<div class="review-row ${status}" onclick="openReview(${q.n})">
-      <span class="num">Q${q.n}</span>
+      <span class="num">Q${pos+1}</span>
       <span>Part ${q.part} ${state.flags[q.n]?'· ★ flagged':''}</span>
       <span class="status">${label}</span>
     </div>`;
@@ -480,9 +480,10 @@ function renderReviewDetail(){
   if(!state.reviewFocus) return '';
   const q = QUESTIONS.find(x=>x.n===state.reviewFocus);
   const given = state.answers[q.n];
+  const pos = activeQuestions().indexOf(q);
   let html = `<div class="q-card" id="reviewDetail" style="margin-top:8px;">
     <div class="q-meta">
-      <div><span class="q-number">QUESTION ${q.n} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
+      <div><span class="q-number">QUESTION ${pos+1} OF ${activeQuestions().length}</span> &nbsp; <span class="q-part">Part ${q.part}</span></div>
       <button class="link-btn" onclick="closeReviewDetail()">Close ×</button>
     </div>
     <div class="q-text"><p>${q.text}</p>`;
