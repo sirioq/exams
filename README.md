@@ -40,6 +40,13 @@ compulsory + chosen questions are timed, scored, and submitted — everyone stil
 54-question paper, just a different 54 depending on what they picked. A test with no `optionalParts`
 (like ENGAA) behaves exactly as before; this is purely additive.
 
+**Question numbering shown to the student is position-in-their-paper, not the question's global number.**
+A question's `n` is its position in the *whole* paper (1–80, say), but a student who skips a part never
+sees most of those questions — so the engine always displays and navigates by position-within-what-they-
+chose (e.g. "Question 26 of 40"), computed from `activeQuestions()`, not by printing `q.n` directly. `q.n`
+stays the right thing to use as an internal id (answer storage, flags, jump-to-review links) — just never
+for a label the student reads. If you ever touch the rendering code, keep that split: id vs label.
+
 Because different students in the same class may sit different combinations, NSAA's Google Form needs a
 different shape from ENGAA's — see the Form setup notes for this test below.
 
@@ -163,6 +170,63 @@ diagram as well as for grids of several small answer-option diagrams on one page
 
 ---
 
+# Reusable answer-option patterns
+
+Two kinds of question don't fit the plain "options: `[[\"A\", \"some text\"], ...]`" shape, and both have a
+proper, declarative way to author them — use these instead of hand-splicing HTML or approximating with
+plain text, even under time pressure. Both are purely additive: a question that uses neither renders
+exactly as it always has.
+
+## Diagrams as answer options
+
+When the options themselves are images (e.g. "which diagram shows...", a grid of small graphs), don't
+embed `<img>` tags directly inside the `options` array — that data can't be hand-edited or `str_replace`'d
+safely afterward (a base64 blob makes every edit an exercise in regex-splicing, which is exactly as
+fragile as it sounds). Instead:
+
+1. Crop each option's image (see "Diagram cropping methodology" above) and add each one to `DIAGRAMS` under
+   its own plain key, same as any stem diagram — e.g. `q22optA`, `q22optB`, ...
+2. On the question, add `optionDiagrams: {A:"q22optA", B:"q22optB", ...}` mapping each letter to its key.
+3. Leave `options` as empty-text pairs: `[["A",""], ["B",""], ...]` — the engine substitutes the real
+   diagram at render time for any letter present in `optionDiagrams`, and falls back to the plain text/HTML
+   otherwise.
+
+This also unlocks the `options-grid` CSS class (added automatically whenever `optionDiagrams` is present),
+which lays the options out two-per-row instead of one-per-row, so each diagram gets roughly double the
+display width — worth doing for any multi-diagram-option question, not just dense ones.
+
+## Table-style answer options
+
+When the original paper shows the answer choices as a table (a shared header row, each option a row with
+several columns), don't fall back to a comma-separated string ("$2v$, $\frac{1}{2}f$") or a hand-labelled
+one ("organ 1: kidney · organ 2: ...") — both lose the original's structure and get harder to read exactly
+as the column count grows. Use:
+
+```js
+optionColumns: ["term-to-term rule", "term which has a value of 17"],
+optionColumnWidths: [70, 30],   // optional; omit for an even split across columns
+options: [
+  ["A", ["subtract 5", "11th"]],
+  ["B", ["subtract 5", "29th"]],
+  ...
+],
+```
+
+The engine builds the header once from `optionColumns` and a matching row for every option from its array
+of values, so columns are generated from one source and are therefore always aligned — no hand-typed
+per-option markup, no risk of one row's column widths drifting from another's. `optionColumnWidths` is
+only worth setting when the columns have very different natural lengths (e.g. a short code/number next to
+a full sentence); the even default is fine otherwise.
+
+**Keep column headers short.** The header and every row share the same narrow mobile width, so a long
+multi-word header (e.g. "carbon-rich compounds in animals") wraps across several lines and makes the whole
+table needlessly tall — shorten anything the question's own text already gives context for (that example
+became just "in animals"). Check any table with 3+ columns, or any column holding full sentences, on an
+actual narrow-width render before trusting it (see the verification lesson below) — that's exactly how a
+header-text overflow bug was caught on a 4-column table during this test's build.
+
+---
+
 # Lessons learned / things to watch for
 
 These are real bugs found and fixed during earlier builds. Worth checking for on every new test.
@@ -227,3 +291,18 @@ A stacked-fraction answer list that extracts as scrambled digits/operators is no
 a plausible-looking reconstruction; see "Reading math-heavy and diagram-heavy pages" above. Treat garbled
 extraction as a signal to render and read the actual page, not as a prompt to fill in something that
 merely looks like a reasonable multiple-choice option.
+
+**8. Flex items don't shrink below their content's natural width by default — set `min-width:0`.**
+Any flex row holding text that needs to wrap inside a fixed-width cell (the `optionColumns` table cells
+being the concrete case) needs `min-width:0` on the flex item, or the browser lets it overflow its
+assigned width rather than wrap — on a narrow table this shows up as text actually spilling into the
+*next* column, not just an ugly line break. This is a general CSS flexbox trap, not specific to this
+codebase, but it's easy to lose an afternoon to if you don't already know the name of it.
+
+**9. A layout or CSS change isn't verified until you've actually rendered it, at a realistic width.**
+Reading the generated HTML, or checking it on a wide desktop viewport, will not catch overflow or
+alignment bugs — the min-width bug above looked completely fine in the markup and only showed up as
+visibly broken on an actual ~390px-wide mobile render. Render the real page (a headless browser driven by
+a short script works well) at the width real students will actually use before considering a visual
+change finished, the same way "Reading math-heavy and diagram-heavy pages" and "Diagram cropping
+methodology" above both insist on rendering and looking before trusting a page-extraction result.
