@@ -294,6 +294,28 @@ function optionLabel(q){
   return q.options;
 }
 
+/* For questions with optionColumns: build a flex row of cells (used for both
+   the header and each option's own row), so widths are generated once from
+   the same source and therefore always line up -- no hand-typed per-option
+   markup, no risk of columns drifting apart between rows. */
+function optionColumnsWidths(q){
+  if(q.optionColumnWidths) return q.optionColumnWidths;
+  const n = q.optionColumns.length;
+  return q.optionColumns.map(()=> (100/n));
+}
+function optionColumnsRowHTML(q, values){
+  const widths = optionColumnsWidths(q);
+  return `<div class="option-table-row">` + values.map((v,i)=>
+    `<div class="otc" style="width:${widths[i]}%">${v}</div>`
+  ).join('') + `</div>`;
+}
+function optionColumnsHeaderHTML(q){
+  return `<div class="option-table-header">
+    <div class="option-key" style="visibility:hidden">A</div>
+    ${optionColumnsRowHTML(q, q.optionColumns)}
+  </div>`;
+}
+
 function renderQuestion(q){
   const selected = state.answers[q.n];
   const flagged = !!state.flags[q.n];
@@ -312,10 +334,14 @@ function renderQuestion(q){
     html += q.after;
   }
   html += `</div>`;
-  html += `<div class="options ${q.optionDiagrams ? 'options-grid' : ''}">`;
+  html += `<div class="options ${q.optionDiagrams ? 'options-grid' : ''} ${q.optionColumns ? 'options-table' : ''}">`;
+  if(q.optionColumns) html += optionColumnsHeaderHTML(q);
   q.options.forEach(([key,text])=>{
     const sel = selected===key ? 'selected':'';
-    const content = (q.optionDiagrams && q.optionDiagrams[key]) ? DIAGRAMS[q.optionDiagrams[key]] : text;
+    let content;
+    if(q.optionDiagrams && q.optionDiagrams[key]) content = DIAGRAMS[q.optionDiagrams[key]];
+    else if(q.optionColumns) content = optionColumnsRowHTML(q, text);
+    else content = text;
     html += `<div class="option ${sel}" onclick="selectAnswer(${q.n},'${key}')">
       <div class="option-key">${key}</div>
       <div class="option-text">${content}</div>
@@ -489,12 +515,16 @@ function renderReviewDetail(){
     <div class="q-text"><p>${q.text}</p>`;
   if(q.diagram) html += `<div class="q-diagram">${DIAGRAMS[q.diagram]}${q.caption?`<div class="diagram-caption">${q.caption}</div>`:''}</div>`;
   if(q.after) html += q.after;
-  html += `</div><div class="options ${q.optionDiagrams ? 'options-grid' : ''}">`;
+  html += `</div><div class="options ${q.optionDiagrams ? 'options-grid' : ''} ${q.optionColumns ? 'options-table' : ''}">`;
+  if(q.optionColumns) html += optionColumnsHeaderHTML(q);
   q.options.forEach(([key,text])=>{
     let cls='';
     if(key===q.answer) cls='correct';
     else if(key===given) cls='incorrect';
-    const content = (q.optionDiagrams && q.optionDiagrams[key]) ? DIAGRAMS[q.optionDiagrams[key]] : text;
+    let content;
+    if(q.optionDiagrams && q.optionDiagrams[key]) content = DIAGRAMS[q.optionDiagrams[key]];
+    else if(q.optionColumns) content = optionColumnsRowHTML(q, text);
+    else content = text;
     html += `<div class="option ${cls}">
       <div class="option-key">${key}</div>
       <div class="option-text">${content}${key===q.answer?' &nbsp;<strong style="color:var(--answered); font-family:var(--sans); font-size:12.5px;">(correct answer)</strong>':''}${key===given && key!==q.answer?' &nbsp;<strong style="color:var(--wrong); font-family:var(--sans); font-size:12.5px;">(your answer)</strong>':''}</div>
