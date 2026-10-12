@@ -170,6 +170,13 @@
   .option-table-row{
     display:flex; flex:1; min-width:0;
   }
+  /* .option-text has no flex-grow by default, so as a flex child of .option it
+     shrinks to its content's width instead of filling the row -- which silently
+     breaks column alignment against the header (which *does* fill the row).
+     Force it to fill the same way the header's row already does. */
+  .options-table .option .option-text{
+    flex:1; min-width:0;
+  }
   .otc{
     padding:2px 10px;
     box-sizing:border-box;
