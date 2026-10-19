@@ -137,10 +137,23 @@ nonsense, and that only gets caught by rendering and reading the page.
 
 # Diagram cropping methodology
 
+**This needs little or nothing from the manual diagram-cropper tool.** Across this whole 80-question
+paper, every diagram turned out to be built from PDF vector paths — including ones that *look* like
+scanned/raster images at a glance (a shaded test-tube illustration, a lamp stand with gradient fill were
+both 100% vector). Vector content can be cropped and re-rendered at any resolution directly from the PDF,
+which is both faster and sharper than a hand-made crop. Check which you're dealing with before reaching
+for the manual tool: `len(page.get_drawings())` vs `len(page.get_images())` — drawings means vector (use
+the method below), images means an actual embedded raster/scan (the manual cropper is still the right
+tool there, since there's no vector geometry to compute a box from).
+
+**Setup:** PyMuPDF isn't installed by default in a fresh session — `pip install pymupdf
+--break-system-packages` before any of this works (`import fitz`, or `import pymupdf` — same package,
+`fitz` is the legacy import name and still works, just emits a deprecation warning).
+
 Freehand/eyeballed cropping (picking pixel coordinates by guessing from a preview) is how lesson #3
 below happens — margins that are too loose (catching stray question text) or too tight (clipping axis
-labels). It also makes it easy to miss that a question has *more than one* diagram to capture — see the
-new lesson #6.
+labels). It also makes it easy to miss that a question has *more than one* diagram to capture — see
+lesson #6.
 
 **Better approach — compute the crop from the PDF's own geometry, then verify by eye:**
 
@@ -222,8 +235,16 @@ a full sentence); the even default is fine otherwise.
 multi-word header (e.g. "carbon-rich compounds in animals") wraps across several lines and makes the whole
 table needlessly tall — shorten anything the question's own text already gives context for (that example
 became just "in animals"). Check any table with 3+ columns, or any column holding full sentences, on an
-actual narrow-width render before trusting it (see the verification lesson below) — that's exactly how a
-header-text overflow bug was caught on a 4-column table during this test's build.
+actual narrow-width render before trusting it (see lesson #9 below) — that's exactly how a header-text
+overflow bug was caught on a 4-column table during this test's build.
+
+**`questions-meta.js` must flatten the array before it reaches `analysis-engine.js`.** The shared analysis
+tool assumes every option's text is a plain string — it calls `.replace()`/`.slice()` on it directly to
+build the results breakdown. An array value like `["subtract 5","11th"]` has no `.replace()`, so if the
+meta generator passes the array straight through, the class results screen throws as soon as it tries to
+render that question — see lesson #10 below for exactly what that looks like and why it's easy to
+misdiagnose. Join each option's values into one string for the meta file (`"subtract 5 / 11th"` is fine);
+the quiz itself still gets the real array via `questions.js`, only the lean analysis copy needs flattening.
 
 ---
 
@@ -306,3 +327,17 @@ visibly broken on an actual ~390px-wide mobile render. Render the real page (a h
 a short script works well) at the width real students will actually use before considering a visual
 change finished, the same way "Reading math-heavy and diagram-heavy pages" and "Diagram cropping
 methodology" above both insist on rendering and looking before trusting a page-extraction result.
+
+**10. A crash inside the results-rendering code can look exactly like a hung Google sign-in.**
+`analysis-engine.js` calls plain string methods (`.replace()`, `.slice()`) on every option's text while
+building the results breakdown — this ran for every test fine until a table-style question's option
+became an array instead of a string (see "Table-style answer options" above) and it started throwing.
+The symptom had nothing resembling an error message: the page stayed on "Signing in…" forever. Why: the
+throw happens inside the promise chain right after a successful sign-in and data fetch, and the handler
+that's supposed to catch it and show an error message calls the exact same broken render code to do so —
+so *that* throws too, before the page ever repaints. The very last successful screen update was the
+sign-in button's loading state, so that's what stays frozen, and the real error only exists in the
+browser console. The general lesson: if a UI looks stuck rather than erroring, don't assume the stuck
+*stage* is where the bug is — it's often just the last stage that successfully rendered before a later
+one started silently failing. Check the browser console before spending time on the stage the symptom
+points at.
