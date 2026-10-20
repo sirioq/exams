@@ -73,9 +73,8 @@ happening:
 
 2. **`tests/<new-test-id>/questions-meta.js`** — the lean version (no diagrams) that calls
    `window.registerTest({ id, label, spreadsheetId, range, questions })`.
-   `spreadsheetId`/`range` come from the new Google Form's results Sheet (same setup as before —
-   create the Form, wire the entry IDs into `questions.js`'s `resultsForm`, then share the Sheet with
-   whichever Google accounts should be able to pull results).
+   `spreadsheetId`/`range` come from the new Google Form's results Sheet — see "Setting up the Form and
+   Sheet for a new test" below for exactly how to get these.
 
 3. **`tests/<new-test-id>/quiz.html`** — three lines, identical pattern to the existing one, just
    pointing at the new folder's `questions.js`.
@@ -89,6 +88,57 @@ happening:
 Nothing in `shared/` ever needs to change for a new test — that's the whole point of splitting it this way.
 If you ever do want to tweak shared behavior (say, add a new results-view feature), it only needs to be
 written once and every test picks it up immediately.
+
+---
+
+# Setting up the Form and Sheet for a new test
+
+This is the one piece of adding a new test that happens outside this repo, in Google's own UI — I can't do
+it for you, but everything after it (wiring the IDs into `questions.js`/`questions-meta.js`) I can.
+
+**One-time setup, not per-test:** the Google OAuth client ID used for teacher sign-in on the analysis page
+already lives in `shared/analysis-engine.js` and covers every test — skip straight to the per-test steps
+below, there's no Cloud Console work needed for a new test.
+
+**Per new test:**
+
+1. **Create a new Google Form** with five short-answer questions, one per piece of data the quiz submits
+   automatically on completion: a name field, a score field, a parts field (which optional part(s) the
+   student sat, for tests with `optionalParts`), a time field, and an answers field. None of the five
+   need to be marked "Required" — the quiz always fills all five itself, and marking them required only
+   adds a way for a submission to be silently rejected if that ever isn't true.
+
+2. **Get each field's entry ID.** Open the form's **⋮ menu → Get pre-filled link**. On the page that
+   opens, type a distinct placeholder into each field — literally typing `name` into the name field,
+   `score` into the score field, and so on makes the next step trivial — then click **Get link** and copy
+   it. The copied URL contains `entry.XXXXXXXXX=name`, `entry.XXXXXXXXX=score`, etc. — each `entry.<digits>`
+   immediately before `=yourplaceholder` is that field's entry ID. This is the only way to find them; they
+   aren't shown anywhere in the normal form editor.
+
+3. **Get the submission URL.** Take that same link (or the form's normal share link) up to and including
+   `/viewform`, and replace `/viewform` with `/formResponse` — that's the actual POST endpoint the quiz
+   submits to in the background. The person taking the test never sees this URL or the form itself.
+
+4. **Link the Form to a response spreadsheet.** In the form editor's **Responses** tab, click the green
+   Sheets icon. You can link to a brand new spreadsheet, or — as this project does — link into a **new
+   tab of an existing spreadsheet** that already holds other tests' responses; Google Forms creates that
+   tab automatically, usually named `Form responses <n>`. Note the exact tab name (spacing and number
+   matter) and the spreadsheet's own ID (the long string in its URL, between `/d/` and `/edit`).
+
+5. **Share the spreadsheet** with every Google account that should be able to pull results on the
+   analysis page — being the form's owner isn't enough by itself unless that's also the account signing
+   in to the analysis tool. Viewer access is enough; the analysis page only reads.
+
+6. **Wire it all into the two files:**
+   - `questions.js`'s `resultsForm`: `actionUrl` is the `/formResponse` URL from step 3; `entries` maps
+     `name`/`score`/`parts`/`timeUsed`/`answers` to the five entry IDs from step 2 (note `timeUsed`, not
+     `time`, is the key the engine actually reads — see `shared/quiz-engine.js`'s `isFormConfigured`/
+     submission code if in doubt).
+   - `questions-meta.js`: `spreadsheetId` from step 4, and `range` as `"<exact tab name>!A:Z"`.
+
+Cross-check both files against each other once done — they point at the same Form's data from two
+different places (the quiz submits to it, the analysis tool reads the results of that submission back),
+so a typo in either one means results silently go missing on one side without the other complaining.
 
 ---
 
