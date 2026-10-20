@@ -916,9 +916,9 @@ const QUESTIONS = [
   "part": "B",
   "text": "A star is moving away from a space telescope positioned above the Earth. The star emits light of frequency $f$ and wavelength $\\lambda$ at the speed of light $c$.</p><p>This light travels towards the space telescope through the vacuum of space until it is detected on the space telescope.</p><p>The frequency, the wavelength and the speed of the light measured at the telescope are $f_T$, $\\lambda_T$ and $c_T$ respectively.</p><p>How do $f_T$, $\\lambda_T$ and $c_T$ compare with $f$, $\\lambda$ and $c$?",
   "optionColumns": [
-   "$f_T$",
-   "$\\lambda_T$",
-   "$c_T$"
+   "<span style=\"text-transform:none;letter-spacing:0;font-size:14px;\">$f_T$</span>",
+   "<span style=\"text-transform:none;letter-spacing:0;font-size:14px;\">$\\lambda_T$</span>",
+   "<span style=\"text-transform:none;letter-spacing:0;font-size:14px;\">$c_T$</span>"
   ],
   "options": [
    [
