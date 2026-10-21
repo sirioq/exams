@@ -478,21 +478,23 @@ function reviewList(){
     let status = given===undefined ? 'blank' : (given===q.answer ? 'correct' : 'incorrect');
     if(reviewFilter!=='all' && reviewFilter!==status) return;
     const label = status==='correct' ? '✓ Correct' : status==='incorrect' ? `✗ Incorrect` : '— Blank';
-    rows += `<div class="review-row ${status}" onclick="openReview(${q.n})">
+    rows += `<div class="review-row ${status} ${state.reviewFocus===q.n?'open':''}" id="reviewRow${q.n}" onclick="openReview(${q.n})">
       <span class="num">Q${pos+1}</span>
       <span>Part ${q.part} ${state.flags[q.n]?'· ★ flagged':''}</span>
       <span class="status">${label}</span>
     </div>`;
+    if(state.reviewFocus===q.n) rows += renderReviewDetail();
   });
   if(!rows) rows = `<div style="text-align:center; color:var(--ink-soft); padding:20px; font-size:14px;">No questions in this category.</div>`;
   return rows;
 }
 
 function openReview(n){
-  state.reviewFocus=n;
+  const wasOpen = state.reviewFocus===n;
+  state.reviewFocus = wasOpen ? null : n;
   render();
   setTimeout(()=>{
-    const el = document.getElementById('reviewDetail');
+    const el = document.getElementById('reviewRow'+n);
     if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
   },30);
 }
@@ -625,7 +627,6 @@ function renderResults(){
       <button class="${state.reviewFilter==='correct'?'active':''}" onclick="setReviewFilter('correct')">Correct</button>
     </div>
     <div class="review-list">${reviewList()}</div>
-    ${renderReviewDetail()}
   </div>
   `;
 }

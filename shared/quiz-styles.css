@@ -336,6 +336,8 @@
     background:var(--card); border:1px solid var(--line); border-radius:8px;
     padding:10px 14px; cursor:pointer; font-size:13.5px;
   }
+  .review-row{scroll-margin-top:64px;}
+  .review-row.open{border-color:var(--navy,#132038);}
   .review-row .num{width:24px; font-weight:700; color:var(--ink-soft); font-family:var(--sans);}
   .review-row .status{margin-left:auto; font-weight:700; font-size:12px;}
   .review-row.correct .status{color:var(--answered);}
