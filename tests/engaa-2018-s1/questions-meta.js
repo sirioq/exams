@@ -14,7 +14,7 @@ window.registerTest({
   id: "engaa-2018-s1",
   label: "ENGAA 2018 — Section 1",
   spreadsheetId: "1uIIVT81OBdmi1Hs7ILaCMBe5wOxXAO6R4BQ_nb_eTXQ",
-  range: "Form responses 1!A:Z",
+  range: "engaa-2018-s1!A:Z",
   questions: QUESTIONS_META,
 });
 })();
