@@ -13,7 +13,7 @@ window.registerTest({
   id: "nsaa-2019-s1",
   label: "NSAA 2019 — Section 1",
   spreadsheetId: "1uIIVT81OBdmi1Hs7ILaCMBe5wOxXAO6R4BQ_nb_eTXQ",
-  range: "Form responses 2!A:Z",
+  range: "nsaa-2019-s1!A:Z",
   questions: QUESTIONS_META,
 });
 })();
