@@ -7,7 +7,7 @@ window.registerTest({
   id: "nsaa-2021-s1",
   label: "NSAA 2021 — Section 1",
   spreadsheetId: "1uIIVT81OBdmi1Hs7ILaCMBe5wOxXAO6R4BQ_nb_eTXQ",
-  range: "Form responses 4!A:Z",
+  range: "nsaa-2021-s1!A:Z",
   questions: QUESTIONS_META,
 });
 })();
